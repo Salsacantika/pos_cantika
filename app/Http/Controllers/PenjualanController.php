@@ -42,16 +42,45 @@ class PenjualanController extends Controller
      */
     public function create(Request $request)
     {
-        $sale = Penjualan::firstOrCreate(
-            [
+        if (!session('keep_cart')) {
+            // 🧹 Bersihkan transaksi pending lama milik user ini (jika ada)
+            $oldPending = Penjualan::where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->first();
+
+            if ($oldPending) {
+                DB::transaction(function () use ($oldPending) {
+                    // kembalikan stok dari item yang sempat ditambahkan
+                    foreach ($oldPending->itemPenjualan as $item) {
+                        $item->produk->increment('stok', $item->kuantitas);
+                    }
+
+                    $oldPending->itemPenjualan()->delete();
+                    $oldPending->delete();
+                });
+            }
+
+            // 🆕 Buat transaksi baru yang benar-benar kosong
+            $sale = Penjualan::create([
                 'user_id' => Auth::id(),
-                'status' => 'pending'
-            ],
-            [
+                'status' => 'pending',
                 'total_pembayaran' => 0,
                 'metode_pembayaran' => 'cash'
-            ]
-        );
+            ]);
+
+        } else {
+            // 🔁 Masih dalam proses belanja yang sama
+            $sale = Penjualan::firstOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'status' => 'pending'
+                ],
+                [
+                    'total_pembayaran' => 0,
+                    'metode_pembayaran' => 'cash'
+                ]
+            );
+        }
 
         $keyword = $request->input('search');
 
@@ -77,9 +106,6 @@ class PenjualanController extends Controller
     /**
      * Display the specified resource.
      */
-    /**
- * Display the specified resource.
- */
     public function show(Penjualan $penjualan)
     {
         // Load relasi user dan itemPenjualan beserta data produknya
@@ -87,33 +113,34 @@ class PenjualanController extends Controller
 
         return view('penjualan.show', compact('penjualan'));
     }
-        /**
-         * Show the form for editing the specified resource.
-         */
-        public function edit(Penjualan $penjualan)
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Penjualan $penjualan)
     {
         $sale = $penjualan;
 
-    abort_if($sale->status === 'COMPLETED', 403);
+        abort_if(strtolower($sale->status) === 'completed', 403);
 
-    $sale->load('itemPenjualan');
-    $products = Produk::orderBy('nama')->get();
-    $mode = 'edit';
+        $sale->load('itemPenjualan');
+        $products = Produk::orderBy('nama')->get();
+        $mode = 'edit';
 
-    return view('penjualan.pos', compact('sale', 'products', 'mode'));
-}
-
+        return view('penjualan.pos', compact('sale', 'products', 'mode'));
+    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Penjualan $penjualan)
     {
+        // Perbaikan validasi agar mendukung huruf kecil/besar (lowercase/uppercase)
         $request->validate([
-            'payment_method' => 'required|in:CASH,QRIS'
+            'payment_method' => 'required|string|in:cash,qris,CASH,QRIS'
         ]);
 
-        if ($penjualan->status !== 'pending') {
+        if (strtolower($penjualan->status) !== 'pending') {
             return back()->with('errors', 'Transaksi sudah diproses');
         }
 
@@ -122,12 +149,11 @@ class PenjualanController extends Controller
         }
 
         DB::transaction(function () use ($penjualan, $request) {
-
             // 🔄 Hitung ulang total (anti manipulasi)
             $total = $penjualan->itemPenjualan()->sum('subtotal');
 
             $penjualan->update([
-                'metode_pembayaran' => $request->payment_method,
+                'metode_pembayaran' => strtolower($request->payment_method),
                 'total_pembayaran'  => $total,
                 'status'            => 'completed'
             ]);
@@ -141,30 +167,29 @@ class PenjualanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-   public function destroy(Penjualan $penjualan)
-{
-    $this->authorize('delete',$penjualan);
-    // ❗ Pastikan hanya transaksi yang belum selesai (OPEN/pending) yang bisa dihapus
-    if (strtolower($penjualan->status) !== 'pending' && strtolower($penjualan->status) !== 'open') {
-        return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
-    }
+    public function destroy(Penjualan $penjualan)
+    {
+        $this->authorize('delete', $penjualan);
 
-    DB::transaction(function () use ($penjualan) {
-
-        foreach ($penjualan->itemPenjualan as $item) {
-            // 🔄 kembalikan stok
-            $item->produk->increment('stok', $item->kuantitas);
+        if (strtolower($penjualan->status) !== 'pending' && strtolower($penjualan->status) !== 'open') {
+            return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
         }
 
-        // ❌ hapus item
-        $penjualan->itemPenjualan()->delete();
+        DB::transaction(function () use ($penjualan) {
+            foreach ($penjualan->itemPenjualan as $item) {
+                // 🔄 kembalikan stok
+                $item->produk->increment('stok', $item->kuantitas);
+            }
 
-        // ❌ hapus penjualan
-        $penjualan->delete();
-    });
+            // ❌ hapus item
+            $penjualan->itemPenjualan()->delete();
 
-    return redirect()
-        ->route('penjualan.index')
-        ->with('success', 'Transaksi berhasil dibatalkan');
-}
+            // ❌ hapus penjualan
+            $penjualan->delete();
+        });
+
+        return redirect()
+            ->route('penjualan.index')
+            ->with('success', 'Transaksi berhasil dibatalkan');
+    }
 }

@@ -13,6 +13,10 @@
         --maison-border: #ede4dc;
         --maison-text-main: #1e1e1e;
         --maison-text-muted: #737373;
+        
+        /* Variabel tambahan selaras dengan halaman users */
+        --lux-primary: #8e5b42;
+        --lux-gold-light: #fbf6ee;
     }
 
     /* Typography & Core */
@@ -134,53 +138,66 @@
         background-color: var(--maison-brown-soft);
     }
 
-    /* Executive Badges */
-    .badge-pro-open {
-        background-color: #fffbeb;
-        color: #d97706;
-        border: 1px solid #fef3c7;
+    /* Teks Bersih Tanpa Style Button/Badge */
+    .clean-text-status {
         font-weight: 700;
-        font-size: 0.7rem;
-        padding: 6px 12px;
-        border-radius: 30px;
-        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
     }
 
-    .badge-pro-completed {
-        background-color: #ecfdf5;
-        color: #059669;
-        border: 1px solid #d1fae5;
-        font-weight: 700;
-        font-size: 0.7rem;
-        padding: 6px 12px;
-        border-radius: 30px;
-        letter-spacing: 0.5px;
-    }
-
-    .badge-pro-method {
-        background-color: var(--maison-brown-light);
-        color: var(--maison-brown-dark);
+    .clean-text-method {
         font-weight: 600;
-        font-size: 0.7rem;
-        padding: 6px 12px;
-        border-radius: 30px;
-        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+        color: var(--maison-brown-dark);
     }
 
-    /* Action Icon Buttons */
-    .action-pro-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    /* Tombol Aksi */
+    .btn-lux-view {
+        background-color: #faf6f0;
+        color: var(--maison-brown);
+        border: 1px solid #ebd6b5;
+        font-weight: 600;
         transition: all 0.2s ease;
-        border: 1px solid transparent;
+    }
+    .btn-lux-view:hover {
+        background-color: var(--maison-brown);
+        color: #ffffff;
+        border-color: var(--maison-brown);
     }
 
-    .action-pro-btn:hover {
-        transform: translateY(-2px);
+    /* Tombol Edit disamakan dengan style halaman users (Luxury Gold/Brown Soft) */
+    .btn-lux-edit {
+        background-color: #faf6f0;
+        color: var(--lux-primary);
+        border: 1px solid #ebd6b5;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .btn-lux-edit:hover {
+        background-color: var(--lux-primary);
+        color: #ffffff;
+        border-color: var(--lux-primary);
+    }
+
+    .btn-lux-delete {
+        background-color: #fff5f5;
+        color: #dc3545;
+        border: 1px solid #f8d7da;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .btn-lux-delete:hover {
+        background-color: #dc3545;
+        color: #ffffff;
+        border-color: #dc3545;
+    }
+
+    .btn-lux-locked {
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        border: 1px solid #e2e8f0;
+        font-weight: 600;
+        cursor: not-allowed;
     }
 </style>
 
@@ -281,14 +298,14 @@
                         <th>Total Pembayaran</th>
                         <th>Metode Bayar</th>
                         <th>Status</th>
-                        <th class="text-center pe-4">Aksi Kontrol</th>
+                        <th class="text-end pe-4">Aksi Kontrol</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($sales as $sale)
                         <tr class="table-pro-row">
                             <td class="ps-4 text-muted fw-bold">
-                                #{{ ($sales->firstItem() + $loop->index) }}
+                                {{ ($sales->firstItem() + $loop->index) }}
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">
@@ -313,49 +330,53 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge-pro-method text-uppercase">
+                                <span class="clean-text-method text-uppercase">
                                     {{ $sale->metode_pembayaran }}
                                 </span>
                             </td>
                             <td>
                                 @if(strtolower($sale->status) === 'pending' || strtolower($sale->status) === 'open')
-                                    <span class="badge-pro-open">
-                                        <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i> OPEN
+                                    <span class="clean-text-status text-warning">
+                                        OPEN
                                     </span>
                                 @else
-                                    <span class="badge-pro-completed">
-                                        <i class="bi bi-check-circle-fill me-1"></i> COMPLETED
+                                    <span class="clean-text-status text-success">
+                                        COMPLETED
                                     </span>
                                 @endif
                             </td>
-                            <td class="text-center pe-4">
-                                <div class="d-flex justify-content-center align-items-center gap-2">
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex justify-content-end align-items-center gap-2">
                                     {{-- Tombol Detail --}}
-                                    <a href="{{ route('penjualan.show', $sale) ?? '#' }}" class="action-pro-btn bg-info-subtle text-info" title="Lihat Detail Transaksi">
-                                        <i class="bi bi-eye-fill"></i>
+                                    <a href="{{ route('penjualan.show', $sale) }}" class="btn btn-lux-view btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" title="Lihat Detail Transaksi">
+                                        <i class="bi bi-eye"></i>
+                                        <span>Detail</span>
                                     </a>
 
                                     {{-- Tombol Edit --}}
                                     @can('update', $sale)
-                                        <a href="{{ route('penjualan.edit', $sale) }}" class="action-pro-btn bg-warning-subtle text-warning-emphasis" title="Ubah Data">
-                                            <i class="bi bi-pencil-fill"></i>
+                                        <a href="{{ route('penjualan.edit', $sale) }}" class="btn btn-lux-edit btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" title="Ubah Data">
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span>Edit</span>
                                         </a>
                                     @endcan
 
-                                    {{-- Tombol Hapus --}}
+                                    {{-- Tombol Hapus dengan SweetAlert2 --}}
                                     @can('delete', $sale)
                                         @if(strtolower($sale->status) === 'pending' || strtolower($sale->status) === 'open')
-                                            <form action="{{ route('penjualan.destroy', $sale) }}" method="POST" class="d-inline">
+                                            <form action="{{ route('penjualan.destroy', $sale) }}" method="POST" id="delete-sale-form-{{ $sale->id }}" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="action-pro-btn bg-danger-subtle text-danger border-0" onclick="return confirm('Hapus transaksi penjualan ini secara permanen?')" title="Hapus Transaksi">
-                                                    <i class="bi bi-trash-fill"></i>
+                                                <button type="button" class="btn btn-lux-delete btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm border-0" onclick="confirmDeleteSale({{ $sale->id }})" title="Hapus Transaksi">
+                                                    <i class="bi bi-trash3"></i>
+                                                    <span>Hapus</span>
                                                 </button>
                                             </form>
                                         @else
-                                            <button type="button" class="action-pro-btn bg-secondary-subtle text-muted opacity-50 border-0"
-                                                    onclick="alert('Transaksi sudah selesai (COMPLETED) dan dikunci dari sistem keamanan.')" title="Terkunci">
+                                            <button type="button" class="btn btn-lux-locked btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm"
+                                                    onclick="Swal.fire({ title: 'Akses Dibatasi', text: 'Transaksi sudah selesai (COMPLETED) dan dikunci dari sistem keamanan.', icon: 'info', confirmButtonColor: '#8e5b42', customClass: { popup: 'rounded-4 shadow-lg border-0' } })" title="Terkunci">
                                                 <i class="bi bi-lock-fill"></i>
+                                                <span>Terkunci</span>
                                             </button>
                                         @endif
                                     @endcan
@@ -394,4 +415,31 @@
         @endif
     </div>
 </div>
+
+{{-- SweetAlert2 CDN & Script Konfirmasi Custom Card untuk Penjualan --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDeleteSale(id) {
+    Swal.fire({
+        title: 'Hapus Transaksi?',
+        text: 'Apakah Anda yakin ingin menghapus transaksi penjualan ini secara permanen?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#8e5b42',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0',
+            confirmButton: 'px-4 py-2 rounded-3 fw-bold',
+            cancelButton: 'px-4 py-2 rounded-3 fw-bold'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-sale-form-' + id).submit();
+        }
+    });
+}
+</script>
 @endsection

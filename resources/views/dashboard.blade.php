@@ -5,20 +5,20 @@
 @section('content')
 <style>
     :root {
-        --lux-primary: #8e5b42;
-        --lux-primary-hover: #734732;
-        --lux-accent: #a26b4e;
+        --lux-primary: #3D0D0D;
+        --lux-primary-hover: #260808;
+        --lux-accent: #3D0D0D;
         --lux-gold: #c5a059;
         --lux-gold-light: #fbf6ee;
         --lux-dark: #0f172a;
         --lux-card-bg: #ffffff;
         --lux-border: #eadbc8;
-        --lux-shadow: 0 20px 40px -15px rgba(142, 91, 66, 0.08);
-        --lux-shadow-hover: 0 25px 50px -12px rgba(142, 91, 66, 0.15);
+        --lux-shadow: 0 20px 40px -15px rgba(61, 13, 13, 0.08);
+        --lux-shadow-hover: 0 25px 50px -12px rgba(61, 13, 13, 0.15);
     }
 
     body {
-        background-color: #f8fafc;
+        background-color: #ffffff;
         font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
@@ -80,7 +80,7 @@
     /* Luxury Table Design */
     .lux-table thead th {
         background-color: #faf6f0;
-        color: #734732;
+        color: #3D0D0D;
         font-weight: 800;
         font-size: 10.5px;
         letter-spacing: 1.2px;
@@ -100,7 +100,7 @@
     .lux-badge-pill {
         background: #ffffff;
         border: 1px solid var(--lux-border);
-        box-shadow: 0 4px 12px rgba(142, 91, 66, 0.04);
+        box-shadow: 0 4px 12px rgba(61, 13, 13, 0.04);
         border-radius: 50rem;
     }
 
@@ -108,7 +108,7 @@
     .fw-extrabold { font-weight: 850 !important; }
 </style>
 
-<div class="container-fluid py-4 px-lg-4">
+<div class="container-fluid py-4 px-lg-4" style="background-color: #ffffff;">
     
     {{-- Page Header & System Date Badge --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom" style="border-color: var(--lux-border) !important;">

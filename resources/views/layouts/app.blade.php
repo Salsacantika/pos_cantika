@@ -8,6 +8,7 @@
 
     {{-- Bootstrap Icons (Untuk Icon Menu Sidebar) --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="icon" href="{{ asset('favicon.png') }}"> 
 
     {{-- SweetAlert2 CDN untuk Notifikasi AI / Custom Modal --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -40,29 +41,6 @@
             }
         }
     </style>
-    <!-- Menu Dropdown Riwayat di Navbar -->
-    {{-- <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarRiwayatDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-clock-history me-1"></i> Riwayat Penjualan
-        </a>
-        <ul class="dropdown-menu shadow-sm border-0 rounded-3 py-2" aria-labelledby="navbarRiwayatDropdown">
-            <li>
-                <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="{{ route('penjualan.riwayat.harian') }}">
-                    <i class="bi bi-calendar-day text-primary"></i> <span>Riwayat Harian</span>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="{{ route('penjualan.riwayat.bulanan') }}">
-                    <i class="bi bi-calendar-month text-success"></i> <span>Riwayat Bulanan</span>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2" href="{{ route('penjualan.riwayat.tahunan') }}">
-                    <i class="bi bi-calendar-range text-warning"></i> <span>Riwayat Tahunan</span>
-                </a>
-        </li>
-    </ul>
-</li> --}}
   
 </body>
 </html>

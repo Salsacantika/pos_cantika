@@ -29,7 +29,9 @@ class ProdukPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->role->name, ['Admin', 'Kasir'], true);
+        // 🔒 Hanya Admin yang boleh menambah produk baru.
+        // Kasir hanya boleh melihat (viewAny/view).
+        return $user->role->name === 'Admin';
     }
 
     /**

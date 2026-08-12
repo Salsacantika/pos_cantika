@@ -7,7 +7,7 @@
     {{-- Brand / Logo --}}
     <a href="{{ route('dashboard') }}" class="d-flex align-items-center mb-4 me-md-auto text-decoration-none px-2 pt-2">
         <span class="brand-text fs-4 fw-bold">Maison</span>
-        <span class="brand-sub fs-5 ms-1 fw-normal">POS</span>
+        <span class="brand-sub fs-5 ms-1 fw-normal">Cantika</span>
     </a>
 
     <hr class="my-2 border-secondary-subtle">
@@ -28,17 +28,26 @@
         </li>
         @endcan
 
+    
+
         <li class="nav-item">
             <a href="{{ route('produk.index') }}" class="nav-link py-2 px-3 rounded-3 fw-medium d-flex align-items-center {{ Request::is('produk*') ? 'active-link' : 'custom-link' }}">
                 <i class="bi bi-box-seam-fill me-2 fs-5"></i> Produk
             </a>
         </li>
-
         <li class="nav-item">
             <a href="{{ route('penjualan.index') }}" class="nav-link py-2 px-3 rounded-3 fw-medium d-flex align-items-center {{ Request::is('penjualan*') ? 'active-link' : 'custom-link' }}">
                 <i class="bi bi-receipt me-2 fs-5"></i> Penjualan
             </a>
         </li>
+
+        <li class="nav-item">
+            <a href="{{ route('tentang') }}" class="nav-link py-2 px-3 rounded-3 fw-medium d-flex align-items-center {{ Request::is('tentang*') ? 'active-link' : 'custom-link' }}">
+                <i class="bi bi-info-circle-fill me-2 fs-5"></i> Tentang
+            </a>
+        </li>
+
+        
     </ul>
 
     <hr class="my-3 border-secondary-subtle">

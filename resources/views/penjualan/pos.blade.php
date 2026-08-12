@@ -63,6 +63,23 @@
         text-transform: uppercase;
         border: 1px solid #ebd6b5;
     }
+    .lux-badge-warning {
+        background: #fff7e6;
+        color: #a15c00;
+        border: 1px solid #ffe1a3;
+    }
+    .lux-badge-danger {
+        background: #fdecec;
+        color: #b42318;
+        border: 1px solid #f8c9c5;
+    }
+    .lux-product-card.is-out-of-stock {
+        opacity: 0.65;
+    }
+    .lux-stock-note {
+        font-size: 10.5px;
+        font-weight: 700;
+    }
 
     /* Tombol Luxury Primary */
     .btn-lux-primary {
@@ -178,13 +195,27 @@
                 <!-- Grid Katalog Produk -->
                 <div class="card-body px-4 py-2 custom-scroll" style="max-height: 60vh; overflow-y: auto;">
                     <div class="row g-3">
+                        @php
+                            // 🔧 Atur ambang batas "stok menipis" di sini
+                            $lowStockThreshold = 5;
+                        @endphp
                         @forelse ($products as $product)
+                            @php
+                                $isOutOfStock = $product->stok <= 0;
+                                $isLowStock = !$isOutOfStock && $product->stok <= $lowStockThreshold;
+                            @endphp
                             <div class="col-md-6">
-                                <form method="POST" action="{{ route('itempenjualan.store') }}" class="lux-product-card p-3 h-100 d-flex flex-column justify-content-between">
+                                <form method="POST" action="{{ route('itempenjualan.store') }}" class="lux-product-card p-3 h-100 d-flex flex-column justify-content-between {{ $isOutOfStock ? 'is-out-of-stock' : '' }}">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                    
-                                    <span class="lux-badge">Ready Stock</span>
+
+                                    @if ($isOutOfStock)
+                                        <span class="lux-badge lux-badge-danger">Stok Habis</span>
+                                    @elseif ($isLowStock)
+                                        <span class="lux-badge lux-badge-warning">Stok Menipis</span>
+                                    @else
+                                        <span class="lux-badge">Ready Stock</span>
+                                    @endif
 
                                     <div>
                                         <div class="d-flex align-items-center gap-3 mb-3">
@@ -199,6 +230,11 @@
                                                 <div class="fw-bold" style="font-size: 14px; color: var(--lux-primary);">
                                                     Rp {{ number_format($product->harga_jual, 0, ',', '.') }}
                                                 </div>
+                                                @if ($isOutOfStock)
+                                                    <div class="lux-stock-note text-danger mt-1">Stok: 0</div>
+                                                @elseif ($isLowStock)
+                                                    <div class="lux-stock-note" style="color: #a15c00;" >Sisa stok: {{ $product->stok }}</div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -209,15 +245,16 @@
                                                    name="quantity" 
                                                    value="1" 
                                                    min="1"
+                                                   max="{{ $product->stok }}"
                                                    class="form-control form-control-sm text-center fw-bold rounded-pill bg-light border-0"
-                                                   {{ $sale->status === 'completed' ? 'readonly' : '' }}>
+                                                   {{ ($sale->status === 'completed' || $isOutOfStock) ? 'readonly' : '' }}>
                                         </div>
                                         <div class="flex-grow-1">
                                             <button type="submit" 
                                                     class="btn btn-lux-primary btn-sm w-100 rounded-pill py-1 d-flex align-items-center justify-content-center gap-1 shadow-sm"
-                                                    {{ $sale->status === 'completed' ? 'disabled' : '' }}
+                                                    {{ ($sale->status === 'completed' || $isOutOfStock) ? 'disabled' : '' }}
                                                     title="Tambah Item">
-                                                <i class="bi bi-bag-plus-fill"></i> Tambah
+                                                <i class="bi bi-bag-plus-fill"></i> {{ $isOutOfStock ? 'Habis' : 'Tambah' }}
                                             </button>
                                         </div>
                                     </div>

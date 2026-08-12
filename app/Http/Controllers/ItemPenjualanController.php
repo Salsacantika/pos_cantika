@@ -100,8 +100,11 @@ class ItemPenjualanController extends Controller
             $sale->save();
         });
 
-        // Kembali ke halaman sebelumnya setelah produk berhasil ditambahkan
-        return back()->with('success', 'Produk berhasil ditambahkan ke keranjang');
+        // 🚦 keep_cart = true → beri tahu PenjualanController::create() bahwa ini
+        // BUKAN navigasi baru, jadi jangan reset transaksi pending yang baru dibuat.
+        return back()
+            ->with('success', 'Produk berhasil ditambahkan ke keranjang')
+            ->with('keep_cart', true);
     }
 
     /**
@@ -124,72 +127,74 @@ class ItemPenjualanController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, ItemPenjualan $itempenjualan)
-{
-    $request->validate([
-        'quantity' => 'required|integer|min:1'
-    ]);
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1'
+        ]);
 
-    DB::transaction(function () use ($request, $itempenjualan) {
+        DB::transaction(function () use ($request, $itempenjualan) {
 
-        $produk = $itempenjualan->produk()->lockForUpdate()->first();
+            $produk = $itempenjualan->produk()->lockForUpdate()->first();
 
-        $selisih = $request->quantity - $itempenjualan->kuantitas;
+            $selisih = $request->quantity - $itempenjualan->kuantitas;
 
-        // 🔍 Jika qty bertambah = kurangi stok
-        if ($selisih > 0) {
-            if ($produk->stok < $selisih) {
-                return redirect()->route('penjualan.create')->with('errors', 'Stok tidak mencukupi');
+            // 🔍 Jika qty bertambah = kurangi stok
+            if ($selisih > 0) {
+                if ($produk->stok < $selisih) {
+                    return redirect()->route('penjualan.create')
+                        ->with('errors', 'Stok tidak mencukupi')
+                        ->with('keep_cart', true);
+                }
+                $produk->decrement('stok', $selisih);
             }
-            $produk->decrement('stok', $selisih);
-        }
 
-        // 🔍 Jika qty berkurang = kembalikan stok
-        if ($selisih < 0) {
-            $produk->increment('stok', abs($selisih));
-        }
+            // 🔍 Jika qty berkurang = kembalikan stok
+            if ($selisih < 0) {
+                $produk->increment('stok', abs($selisih));
+            }
 
-        // 💾 Update item
-        $itempenjualan->update([
-            'kuantitas' => $request->quantity,
-            'subtotal' => $request->quantity * $itempenjualan->harga_satuan
-        ]);
+            // 💾 Update item
+            $itempenjualan->update([
+                'kuantitas' => $request->quantity,
+                'subtotal' => $request->quantity * $itempenjualan->harga_satuan
+            ]);
 
-        // 🔄 Update total penjualan
-        $itempenjualan->penjualan->update([
-            'total_pembayaran' => 
-                $itempenjualan->penjualan->itemPenjualan()->sum('subtotal')
-        ]);
-    });
+            // 🔄 Update total penjualan
+            $itempenjualan->penjualan->update([
+                'total_pembayaran' =>
+                    $itempenjualan->penjualan->itemPenjualan()->sum('subtotal')
+            ]);
+        });
 
-    return back();
-}
-
+        // 🚦 keep_cart = true → jangan reset transaksi pending saat balik ke create()
+        return back()->with('keep_cart', true);
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-   public function destroy(ItemPenjualan $itempenjualan)
-{
-    $this->authorize('delete',$itempenjualan);
-    
-    DB::transaction(function () use ($itempenjualan) {
+    public function destroy(ItemPenjualan $itempenjualan)
+    {
+        $this->authorize('delete', $itempenjualan);
 
-        $produk = $itempenjualan->produk;
-        $sale   = $itempenjualan->penjualan;
+        DB::transaction(function () use ($itempenjualan) {
 
-        // 🔄 Kembalikan stok
-        $produk->increment('stok', $itempenjualan->kuantitas);
+            $produk = $itempenjualan->produk;
+            $sale   = $itempenjualan->penjualan;
 
-        // ❌ Hapus item
-        $itempenjualan->delete();
+            // 🔄 Kembalikan stok
+            $produk->increment('stok', $itempenjualan->kuantitas);
 
-        // 🔄 Update total penjualan
-        $sale->update([
-            'total_pembayaran' => $sale->itemPenjualan()->sum('subtotal')
-        ]);
-    });
+            // ❌ Hapus item
+            $itempenjualan->delete();
 
-    return back();
-}
+            // 🔄 Update total penjualan
+            $sale->update([
+                'total_pembayaran' => $sale->itemPenjualan()->sum('subtotal')
+            ]);
+        });
 
+        // 🚦 keep_cart = true → jangan reset transaksi pending saat balik ke create()
+        return back()->with('keep_cart', true);
+    }
 }

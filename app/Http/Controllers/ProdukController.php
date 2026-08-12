@@ -6,6 +6,7 @@ use App\Http\Requests\SearchRequest;
 use App\Http\Requests\Produk\UpdateRequest;
 use App\Http\Requests\Produk\StoreRequest;
 use App\Models\Produk;
+use App\Models\Jenis;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,13 +21,15 @@ class ProdukController extends Controller
 
         $keyword = $request->input('search');
 
+        $query = Produk::with(['user', 'jenis']);
+
         if ($keyword) {
-            $products = Produk::where('nama', 'like', '%' . $keyword . '%')
+            $products = $query->where('nama', 'like', '%' . $keyword . '%')
                 ->orderBy('nama')
                 ->paginate(10)
                 ->withQueryString();
         } else {
-            $products = Produk::latest()
+            $products = $query->latest()
                 ->paginate(10)
                 ->withQueryString();
         }
@@ -41,30 +44,37 @@ class ProdukController extends Controller
     {
         $this->authorize('create', Produk::class);
 
-        return view('produk.create');
+        $jenisList = Jenis::all();
+
+        return view('produk.create', compact('jenisList'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreRequest $request)
-{
-    $this->authorize('create', Produk::class);
+    {
+        $this->authorize('create', Produk::class);
 
-    $data = $request->validated();
+        $data = $request->validated();
+        $data['user_id'] = Auth::id();
 
-    $data['user_id'] = Auth::id();
+        // Mapping jenis_id dari form ke id_jenis di database
+        if (isset($data['jenis_id'])) {
+            $data['id_jenis'] = $data['jenis_id'];
+            unset($data['jenis_id']);
+        }
 
-    if ($request->hasFile('foto')) {
-        $data['foto'] = $request->file('foto')->store('products', 'public');
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('products', 'public');
+        }
+
+        Produk::create($data);
+
+        return redirect()
+            ->route('produk.index')
+            ->with('success', 'Produk berhasil ditambahkan.');
     }
-
-    Produk::create($data);
-
-    return redirect()
-        ->route('produk.index')
-        ->with('success', 'Produk berhasil ditambahkan.');
-}
 
     /**
      * Display the specified resource.
@@ -81,8 +91,11 @@ class ProdukController extends Controller
     {
         $this->authorize('update', $produk);
 
+        $jenisList = Jenis::all();
+
         return view('produk.edit', [
-            'product' => $produk
+            'product' => $produk,
+            'jenisList' => $jenisList
         ]);
     }
 
@@ -93,13 +106,15 @@ class ProdukController extends Controller
     {
         $this->authorize('update', $produk);
 
-        // Ambil data yang sudah lolos validasi
         $data = $request->validated();
 
-        // Jika user memilih foto baru
-        if ($request->hasFile('foto')) {
+        // Mapping jenis_id dari form ke id_jenis di database
+        if (isset($data['jenis_id'])) {
+            $data['id_jenis'] = $data['jenis_id'];
+            unset($data['jenis_id']);
+        }
 
-            // Hapus foto lama jika ada
+        if ($request->hasFile('foto')) {
             if (
                 $produk->foto &&
                 Storage::disk('public')->exists($produk->foto)
@@ -107,12 +122,10 @@ class ProdukController extends Controller
                 Storage::disk('public')->delete($produk->foto);
             }
 
-            // Simpan foto baru
             $data['foto'] = $request->file('foto')
                 ->store('products', 'public');
         }
 
-        // Update data produk
         $produk->update($data);
 
         return redirect()
@@ -127,10 +140,8 @@ class ProdukController extends Controller
     {
         $this->authorize('delete', $produk);
 
-        // Hapus item penjualan yang terkait dengan produk
         $produk->itemPenjualan()->delete();
 
-        // Hapus foto produk
         if (
             $produk->foto &&
             Storage::disk('public')->exists($produk->foto)
@@ -138,7 +149,6 @@ class ProdukController extends Controller
             Storage::disk('public')->delete($produk->foto);
         }
 
-        // Hapus produk
         $produk->delete();
 
         return redirect()

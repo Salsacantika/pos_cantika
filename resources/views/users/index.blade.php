@@ -85,14 +85,12 @@
         box-shadow: 0 4px 10px rgba(197, 160, 89, 0.15);
     }
 
-    /* Role Badge Eksklusif */
-    .lux-role-badge {
-        background-color: var(--lux-gold-light);
+    /* Teks Peran Akses Clean (Tanpa Gaya Tombol/Badge Mencolok) */
+    .lux-role-text {
         color: var(--lux-primary);
-        border: 1px solid #ebd6b5;
-        font-size: 11px;
-        letter-spacing: 0.5px;
         font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.2px;
     }
 
     /* Aksi Tombol */
@@ -215,7 +213,7 @@
             <table class="table align-middle mb-0 custom-table">
                 <thead class="lux-table-header text-uppercase">
                     <tr>
-                        <th class="ps-4 py-3" style="width: 60px;">#</th>
+                        <th class="ps-4 py-3" style="width: 60px;">No</th>
                         <th class="py-3">Pengguna</th>
                         <th class="py-3">Email Sistem</th>
                         <th class="py-3">Peran Akses</th>
@@ -244,7 +242,7 @@
                             @php
                                 $roleName = is_string($user->role) ? $user->role : ($user->role->name ?? 'Staff');
                             @endphp
-                            <span class="badge lux-role-badge rounded-pill px-3 py-2">
+                            <span class="lux-role-text">
                                 <i class="bi bi-shield-check me-1"></i> {{ ucfirst($roleName) }}
                             </span>
                         </td>
@@ -255,10 +253,10 @@
                                     <span>Edit</span>
                                 </a>
                                 
-                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" id="delete-user-form-{{ $user->id }}" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-lux-delete btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" onclick="return confirm('Yakin ingin menghapus user {{ $user->name }}?')" title="Hapus User">
+                                    <button type="button" class="btn btn-lux-delete btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" onclick="confirmDeleteUser({{ $user->id }}, '{{ $user->name }}')" title="Hapus User">
                                         <i class="bi bi-trash3"></i>
                                         <span>Hapus</span>
                                     </button>
@@ -290,4 +288,31 @@
 
     </div>
 </div>
+
+{{-- SweetAlert2 CDN & Script Konfirmasi Custom Card untuk Users --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDeleteUser(id, name) {
+    Swal.fire({
+        title: 'Hapus Pengguna?',
+        text: `Apakah Anda yakin ingin menghapus user ${name}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#8e5b42',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0',
+            confirmButton: 'px-4 py-2 rounded-3 fw-bold',
+            cancelButton: 'px-4 py-2 rounded-3 fw-bold'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-user-form-' + id).submit();
+        }
+    });
+}
+</script>
 @endsection
