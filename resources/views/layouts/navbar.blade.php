@@ -7,7 +7,7 @@
     {{-- Brand / Logo --}}
     <a href="{{ route('dashboard') }}" class="d-flex align-items-center mb-4 me-md-auto text-decoration-none px-2 pt-2">
         <span class="brand-text fs-4 fw-bold">Maison</span>
-        <span class="brand-sub fs-5 ms-1 fw-normal">Cantika</span>
+        <span class="brand-sub fs-5 ms-1 fw-normal">POS</span>
     </a>
 
     <hr class="my-2 border-secondary-subtle">

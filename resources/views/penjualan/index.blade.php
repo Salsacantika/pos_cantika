@@ -14,19 +14,16 @@
         --maison-text-main: #1e1e1e;
         --maison-text-muted: #737373;
         
-        /* Variabel tambahan selaras dengan halaman users */
         --lux-primary: #8e5b42;
         --lux-gold-light: #fbf6ee;
     }
 
-    /* Typography & Core */
     .page-title {
         color: var(--maison-brown-dark);
         font-weight: 800;
         letter-spacing: -0.75px;
     }
 
-    /* Luxury Glass/Card Container */
     .maison-pro-card {
         background: #ffffff;
         border: 1px solid var(--maison-border);
@@ -35,7 +32,6 @@
         overflow: hidden;
     }
 
-    /* Summary Mini Cards */
     .stat-card {
         background: #ffffff;
         border: 1px solid var(--maison-border);
@@ -62,7 +58,6 @@
         font-size: 1.25rem;
     }
 
-    /* Advanced Search Bar */
     .pro-search-wrapper {
         position: relative;
     }
@@ -92,7 +87,6 @@
         font-size: 1.1rem;
     }
 
-    /* Primary Pro Button */
     .btn-maison-pro {
         background: linear-gradient(135deg, var(--maison-brown) 0%, var(--maison-brown-hover) 100%);
         border: none;
@@ -111,7 +105,6 @@
         color: #ffffff;
     }
 
-    /* Modern Table Header & Rows */
     .table-pro-header th {
         background-color: var(--maison-brown-soft);
         color: var(--maison-brown-dark);
@@ -138,7 +131,6 @@
         background-color: var(--maison-brown-soft);
     }
 
-    /* Teks Bersih Tanpa Style Button/Badge */
     .clean-text-status {
         font-weight: 700;
         font-size: 0.85rem;
@@ -151,7 +143,6 @@
         color: var(--maison-brown-dark);
     }
 
-    /* Tombol Aksi */
     .btn-lux-view {
         background-color: #faf6f0;
         color: var(--maison-brown);
@@ -165,7 +156,6 @@
         border-color: var(--maison-brown);
     }
 
-    /* Tombol Edit disamakan dengan style halaman users (Luxury Gold/Brown Soft) */
     .btn-lux-edit {
         background-color: #faf6f0;
         color: var(--lux-primary);
@@ -259,9 +249,13 @@
         
         <!-- Search & Control Toolbar -->
         <div class="p-4 border-bottom border-light bg-white">
-            <form action="{{ route('penjualan.index') }}" method="GET">
-                <div class="row align-items-center justify-content-between g-3">
-                    <div class="col-md-6 col-lg-5">
+            <div class="row align-items-center justify-content-between g-3">
+                <div class="col-md-6 col-lg-5">
+                    <!-- Kolom pencarian opsional (jika masih mau diketik) -->
+                    <form action="{{ route('penjualan.index') }}" method="GET">
+                        @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
+                        @if(request('tanggal')) <input type="hidden" name="tanggal" value="{{ request('tanggal') }}"> @endif
+                        
                         <div class="pro-search-wrapper">
                             <i class="bi bi-search pro-search-icon"></i>
                             <input 
@@ -269,22 +263,28 @@
                                 name="search" 
                                 value="{{ request('search') }}" 
                                 class="form-control pro-search-input shadow-none" 
-                                placeholder="Cari kode transaksi, kasir, atau data lain..."
+                                placeholder="Cari kode transaksi..."
+                                onchange="this.form.submit()"
                             >
                         </div>
-                    </div>
-                    <div class="col-md-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-dark px-4 rounded-3 fw-semibold py-2" style="background: var(--maison-brown-dark); border:none;">
-                            Filter Data
-                        </button>
-                        @if(request('search'))
-                            <a href="{{ route('penjualan.index') }}" class="btn btn-light border px-3 rounded-3 py-2 text-muted" title="Reset Pencarian">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </a>
-                        @endif
-                    </div>
+                    </form>
                 </div>
-            </form>
+                <div class="col-md-auto d-flex gap-2">
+                    <!-- Tombol Filter memicu Modal -->
+                    <button type="button" class="btn btn-dark px-4 rounded-3 fw-semibold py-2 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalFilter" style="background: var(--maison-brown-dark); border:none;">
+                        <i class="bi bi-funnel-fill"></i> Filter Data
+                        @if(request('status') || request('tanggal'))
+                            <span class="badge bg-warning text-dark rounded-pill ms-1">Aktif</span>
+                        @endif
+                    </button>
+
+                    @if(request('search') || request('status') || request('tanggal'))
+                        <a href="{{ route('penjualan.index') }}" class="btn btn-light border px-3 rounded-3 py-2 text-muted d-flex align-items-center" title="Reset Filter">
+                            <i class="bi bi-arrow-counterclockwise fs-5"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
         </div>
 
         <!-- Professional Data Table -->
@@ -347,13 +347,11 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex justify-content-end align-items-center gap-2">
-                                    {{-- Tombol Detail --}}
                                     <a href="{{ route('penjualan.show', $sale) }}" class="btn btn-lux-view btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" title="Lihat Detail Transaksi">
                                         <i class="bi bi-eye"></i>
                                         <span>Detail</span>
                                     </a>
 
-                                    {{-- Tombol Edit --}}
                                     @can('update', $sale)
                                         <a href="{{ route('penjualan.edit', $sale) }}" class="btn btn-lux-edit btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm" title="Ubah Data">
                                             <i class="bi bi-pencil-square"></i>
@@ -361,7 +359,6 @@
                                         </a>
                                     @endcan
 
-                                    {{-- Tombol Hapus dengan SweetAlert2 --}}
                                     @can('delete', $sale)
                                         @if(strtolower($sale->status) === 'pending' || strtolower($sale->status) === 'open')
                                             <form action="{{ route('penjualan.destroy', $sale) }}" method="POST" id="delete-sale-form-{{ $sale->id }}" class="d-inline">
@@ -393,7 +390,7 @@
                                         </div>
                                     </div>
                                     <h4 class="fw-bold text-dark">Arsip Transaksi Kosong</h4>
-                                    <p class="text-muted small mb-0">Belum ada data penjualan tercatat atau kriteria pencarian tidak ditemukan.</p>
+                                    <p class="text-muted small mb-0">Belum ada data penjualan tercatat atau kriteria filter tidak ditemukan.</p>
                                 </div>
                             </td>
                         </tr>
@@ -413,6 +410,41 @@
                 </div>
             </div>
         @endif
+    </div>
+</div>
+
+<!-- Modal Filter Berdasarkan Pilihan (Dropdown & Datepicker) -->
+<div class="modal fade" id="modalFilter" tabindex="-1" aria-labelledby="modalFilterLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ route('penjualan.index') }}" method="GET" class="w-100">
+            @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="modalFilterLabel">
+                        <i class="bi bi-funnel me-2"></i>Filter Data Transaksi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Filter Berdasarkan Status</label>
+                        <select name="status" class="form-select rounded-3 py-2">
+                            <option value="">Semua Status</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>COMPLETED (Selesai)</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>OPEN / PENDING</option>
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold small text-muted">Filter Berdasarkan Tanggal</label>
+                        <input type="date" name="tanggal" class="form-control rounded-3 py-2" value="{{ request('tanggal') }}">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4 px-3 d-flex gap-2">
+                    <a href="{{ route('penjualan.index') }}" class="btn btn-light rounded-3 py-2 flex-grow-1 border fw-semibold text-muted">Reset Filter</a>
+                    <button type="submit" class="btn btn-dark rounded-3 py-2 flex-grow-1 fw-semibold" style="background: var(--maison-brown-dark); border: none;">Terapkan Filter</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 

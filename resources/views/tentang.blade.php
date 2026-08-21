@@ -1,155 +1,153 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-5 px-xl-5 dashboard-wrapper position-relative overflow-hidden">
-    {{-- Ambient Lighting Effects --}}
-    <div class="ambient-glow glow-one"></div>
-    <div class="ambient-glow glow-two"></div>
+<div class="container-fluid py-5 px-xl-5 developer-wrapper position-relative overflow-hidden">
+    {{-- Dynamic Background Shapes & Ambient Glows --}}
+    <div class="luxury-shape shape-one"></div>
+    <div class="luxury-shape shape-two"></div>
+    <div class="luxury-grid-overlay"></div>
 
     <div class="container position-relative z-2">
         <div class="row justify-content-center">
             <div class="col-xxl-11">
 
-                {{-- Modern Header Section --}}
-                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-5 pb-4 border-bottom border-amber-subtle">
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-2 animate-fade-in">
-                            <span class="badge badge-system-glow px-3.5 py-1.5 rounded-pill font-monospace text-xs uppercase tracking-widest shadow-xs">
-                                <i class="bi bi-shield-lock-fill me-1.5 text-accent animate-spin-slow"></i> Secure Architecture Core
+                {{-- Modern Header Section with Glassmorphism --}}
+                <div class="glass-header-card p-4 p-md-5 rounded-4 mb-5 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4 position-relative overflow-hidden">
+                    <div class="header-glow-accent"></div>
+                    <div class="position-relative z-1">
+                        <div class="d-flex align-items-center gap-2.5 mb-3">
+                            <span class="badge badge-system-modern px-3 py-1.5 rounded-pill font-monospace text-xs uppercase tracking-wider d-flex align-items-center gap-2">
+                                <span class="pulse-dot-mini"></span> Secure Architecture Core
                             </span>
-                            <span class="text-muted opacity-50">•</span>
-                            <span class="text-muted small fw-semibold font-monospace tracking-wider">MAISON-POS // SECURE ENGINE V12</span>
+                            <span class="text-muted opacity-25">•</span>
+                            <span class="text-muted small fw-bold font-monospace tracking-widest text-uppercase">MaisonPOS // v12.x</span>
                         </div>
-                        <h1 class="fw-black text-dark display-5 mb-0 tracking-tight text-gradient-title">Sistem & Pengembang</h1>
+                        <h1 class="fw-black display-5 mb-1 text-gradient-main tracking-tight">Sistem & Pengembang</h1>
+                        <p class="text-secondary mb-0 fw-medium small">Dokumentasi arsitektur sistem tingkat lanjut dan profil pengembang utama.</p>
                     </div>
-                    <div class="mt-4 mt-md-0 d-flex align-items-center gap-3">
-                        <div class="live-status-pill px-4 py-2.5 rounded-pill d-flex align-items-center gap-2.5 shadow-sm bg-white border border-amber-light">
-                            <span class="status-pulse-dot">
-                                <span class="pulse-ring"></span>
-                            </span>
-                            <span class="fw-extrabold text-slate-800 text-xs font-monospace tracking-wide">SECURE: ENCRYPTED (256-BIT)</span>
+                    <div class="position-relative z-1">
+                        <div class="live-security-badge px-4 py-3 rounded-4 d-flex align-items-center gap-3 shadow-sm bg-white/80 backdrop-blur border">
+                            <div class="icon-shield-box rounded-3 d-flex align-items-center justify-content-center text-accent">
+                                <i class="bi bi-shield-lock-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <span class="d-block text-muted font-monospace text-uppercase" style="font-size: 10px;">Security Protocol</span>
+                                <span class="fw-extrabold text-dark font-monospace text-xs">AES-256 ENCRYPTED</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Main Content Grid --}}
-                <div class="row g-5 align-items-center mb-5">
+                {{-- Main Content Bento Grid Layout --}}
+                <div class="row g-4 align-items-stretch mb-5">
                     
-                    {{-- Kolom Kiri: Profil Developer --}}
-                    <div class="col-lg-4 text-center text-lg-start">
-                        <div class="position-relative d-inline-block mb-4 profile-wrapper">
-                            <div class="avatar-glow-ring"></div>
-                            <div class="avatar-orbit-ring"></div>
-                            <img src="{{ asset('images/Gua.jpeg') }}"
-                                 alt="Salsa Cantika Indriyani"
-                                 class="rounded-circle shadow-2xl profile-avatar position-relative"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=Salsa+Cantika+Indriyani&background=b37456&color=fff&size=200'">
-                            <div class="position-absolute bottom-0 end-0 text-white rounded-circle shadow-lg d-flex align-items-center justify-content-center border-4 border-white verified-badge animate-bounce-short" title="Verified Lead Security Architect">
-                                <i class="bi bi-shield-check fw-bold fs-5"></i>
-                            </div>
-                        </div>
+                    {{-- Kolom Kiri: Profil Developer (Bento Profile Card) --}}
+                    <div class="col-lg-4">
+                        <div class="bento-profile-card h-100 p-4 p-xl-5 text-center d-flex flex-column align-items-center justify-content-between position-relative overflow-hidden">
+                            <div class="card-bg-glow"></div>
+                            
+                            <div class="w-100 position-relative z-1">
+                                <div class="position-relative d-inline-block mb-4 profile-wrapper mt-3">
+                                    <div class="avatar-glow-ring"></div>
+                                    <div class="avatar-orbit-ring"></div>
+                                    <img src="{{ asset('images/Gua.jpeg') }}"
+                                         alt="Salsa Cantika Indriyani"
+                                         class="rounded-circle shadow-lg profile-avatar position-relative"
+                                         onerror="this.src='https://ui-avatars.com/api/?name=Salsa+Cantika+Indriyani&background=b37456&color=fff&size=200'">
+                                    <div class="position-absolute bottom-0 end-0 text-white rounded-circle shadow-md d-flex align-items-center justify-content-center border-3 border-white verified-badge animate-bounce-short" title="Verified Lead Security Architect">
+                                        <i class="bi bi-shield-check fw-bold fs-6"></i>
+                                    </div>
+                                </div>
 
-                        <div class="mb-4">
-                            <span class="badge-role-elite px-4 py-1.5 rounded-pill text-xs fw-extrabold uppercase tracking-widest mb-3 d-inline-block font-monospace shadow-xs">
-                                <i class="bi bi-file-earmark-code-fill me-1 text-accent"></i> Lead Laravel Architect
-                            </span>
-                            <h2 class="fw-black text-dark mb-1 fs-2 text-gradient-name">Salsa Cantika Indriyani</h2>
-                            <p class="text-muted small fw-bold mb-0 tracking-wider">Pengembang Utama MaisonPOS</p>
-                        </div>
+                                <div class="mb-4">
+                                    <span class="badge-role-pill px-3.5 py-1.5 rounded-pill text-xs fw-extrabold uppercase tracking-widest mb-2.5 d-inline-block font-monospace">
+                                        <i class="bi bi-code-square me-1"></i> Lead Laravel Architect
+                                    </span>
+                                    <h2 class="fw-black text-dark mb-1 fs-3 text-gradient-main">Salsa Cantika Indriyani</h2>
+                                    <p class="text-muted small fw-bold mb-0 tracking-wide font-monospace">Pengembang Utama MaisonPOS</p>
+                                </div>
+                            </div>
 
-                        <div class="d-flex flex-column gap-2.5 pt-4 border-top border-amber-subtle">
-                            <div class="d-flex align-items-center text-secondary small info-hover-item p-2.5 rounded-3 transition cursor-pointer">
-                                <div class="icon-clean rounded-3 d-flex align-items-center justify-content-center text-accent me-3 shadow-xs">
-                                    <i class="bi bi-geo-alt-fill fs-5"></i>
+                            <div class="w-100 pt-4 border-top border-amber-subtle position-relative z-1 text-start">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex align-items-center text-secondary small info-pill-item p-2.5 rounded-3 transition">
+                                        <div class="icon-clean-sm rounded-2 d-flex align-items-center justify-content-center text-accent me-3">
+                                            <i class="bi bi-geo-alt-fill"></i>
+                                        </div>
+                                        <span class="fw-bold text-slate-700">Tasikmalaya, Jawa Barat</span>
+                                    </div>
+                                    <div class="d-flex align-items-center text-secondary small info-pill-item p-2.5 rounded-3 transition">
+                                        <div class="icon-clean-sm rounded-2 d-flex align-items-center justify-content-center text-accent me-3">
+                                            <i class="bi bi-mortarboard-fill"></i>
+                                        </div>
+                                        <span class="fw-bold text-slate-700">Kelas XII PPLG 1</span>
+                                    </div>
+                                    <div class="d-flex align-items-center text-secondary small info-pill-item p-2.5 rounded-3 transition">
+                                        <div class="icon-clean-sm rounded-2 d-flex align-items-center justify-content-center text-accent me-3">
+                                            <i class="bi bi-laptop"></i>
+                                        </div>
+                                        <span class="fw-bold text-slate-700">Software Engineering</span>
+                                    </div>
                                 </div>
-                                <span class="fw-bold text-slate-700">Kota Tasikmalaya, Jawa Barat</span>
-                            </div>
-                            <div class="d-flex align-items-center text-secondary small info-hover-item p-2.5 rounded-3 transition cursor-pointer">
-                                <div class="icon-clean rounded-3 d-flex align-items-center justify-content-center text-accent me-3 shadow-xs">
-                                    <i class="bi bi-mortarboard-fill fs-5"></i>
-                                </div>
-                                <span class="fw-bold text-slate-700">Kelas XII PPLG 1</span>
-                            </div>
-                            <div class="d-flex align-items-center text-secondary small info-hover-item p-2.5 rounded-3 transition cursor-pointer">
-                                <div class="icon-clean rounded-3 d-flex align-items-center justify-content-center text-accent me-3 shadow-xs">
-                                    <i class="bi bi-code-slash fs-5"></i>
-                                </div>
-                                <span class="fw-bold text-slate-700">PPLG - Software Engineering</span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Kolom Kanan: Detail Desain Laravel & Keamanan Tinggi --}}
+                    {{-- Kolom Kanan: Detail Sistem & Spesifikasi Teknis --}}
                     <div class="col-lg-8">
-                        <div class="ps-lg-4">
+                        <div class="h-100 d-flex flex-column justify-content-between gap-4">
                             
-                            <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="p-3 rounded-4 bg-accent-soft text-accent shadow-sm animate-float">
-                                        <i class="bi bi-shield-shaded fs-4"></i>
+                            {{-- Main Info Box --}}
+                            <div class="bento-main-card p-4 p-xl-5 position-relative overflow-hidden rounded-4">
+                                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="p-3 rounded-4 bg-accent-soft text-accent shadow-xs animate-float">
+                                            <i class="bi bi-cpu-fill fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="fw-black text-dark mb-0 fs-4">MaisonPOS Enterprise Core</h3>
+                                            <span class="text-muted small fw-semibold font-monospace">Laravel 12 Framework & Cryptography</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 class="fw-black text-dark mb-0 fs-3">MaisonPOS Secure Framework</h3>
-                                        <span class="text-muted small fw-semibold font-monospace">Enterprise Laravel 12 & Advanced Cryptography</span>
-                                    </div>
+                                    <span class="badge bg-dark text-white px-3.5 py-2 rounded-pill font-monospace text-xs fw-bold shadow-sm d-flex align-items-center gap-2">
+                                        <span class="dot-amber"></span> v12.0 Stable
+                                    </span>
                                 </div>
-                                <span class="badge bg-dark text-white px-4 py-2.5 rounded-pill font-monospace text-xs fw-bold shadow-md d-flex align-items-center gap-2">
-                                    <span class="dot-amber"></span> Laravel v12.x Secured
-                                </span>
+
+                                <p class="text-secondary lh-lg mb-0 fs-6 fw-medium" style="text-align: justify;">
+                                    <strong class="text-dark">MaisonPOS</strong> dibangun di atas fondasi kerangka kerja <em class="text-accent fw-bold">Laravel 12</em> mutakhir. Mengintegrasikan lapisan proteksi data perusahaan (<span class="fw-bold text-dark">Enterprise Security Layer</span>), mitigasi serangan injeksi SQL, manajemen token CSRF ganda, serta sistem otorisasi peran ketat demi menjamin keamanan transaksi secara menyeluruh.
+                                </p>
                             </div>
 
-                            <p class="text-secondary lh-lg mb-4 fs-6 fw-medium" style="text-align: justify;">
-                                <strong class="text-dark">MaisonPOS</strong> dikembangkan menggunakan arsitektur modern <em class="text-accent fw-bold">Laravel 12</em> dengan penerapan sistem keamanan tingkat tinggi (<span class="fw-bold text-dark">Enterprise Security Layer</span>). Dilengkapi proteksi enkripsi data tingkat lanjut, pencegahan <em>SQL Injection</em>, proteksi <em>CSRF Token</em> berlapis, serta manajemen otorisasi akses berbasis peran yang memastikan integritas transaksi kasir selalu terlindungi secara maksimal.
-                            </p>
-
-                            {{-- Desain Kartu Spesifikasi --}}
-                            <div class="row g-4 mb-4">
+                            {{-- Grid Spesifikasi (2 Kolom Kecil) --}}
+                            <div class="row g-4">
                                 <div class="col-md-6">
-                                    <div class="p-4 rounded-4 spec-card-new h-100 position-relative overflow-hidden">
-                                        <div class="d-flex align-items-start justify-content-between mb-3">
-                                            <div class="tech-icon-circle rounded-3 d-flex align-items-center justify-content-center text-accent shadow-xs">
+                                    <div class="bento-spec-card p-4 rounded-4 h-100 position-relative overflow-hidden">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <div class="tech-icon-box rounded-3 d-flex align-items-center justify-content-center text-accent shadow-xs">
                                                 <i class="bi bi-filetype-php fs-4"></i>
                                             </div>
-                                            <span class="badge-sub-clean font-monospace text-xs px-2.5 py-1 rounded-pill">ENGINE</span>
+                                            <span class="badge-sub-modern font-monospace text-xs px-2.5 py-1 rounded-pill">MVC CORE</span>
                                         </div>
-                                        <span class="d-block text-muted text-uppercase fw-bold font-monospace tracking-wider mb-1" style="font-size: 0.7rem;">Laravel Architecture</span>
+                                        <span class="d-block text-muted text-uppercase fw-bold font-monospace tracking-wider mb-1" style="font-size: 0.65rem;">Framework Architecture</span>
                                         <h4 class="fw-black text-dark fs-5 font-monospace mb-2">Laravel 12 Engine</h4>
-                                        <p class="text-secondary small mb-0 fw-semibold">MVC & Service Container teroptimasi tinggi untuk performa kasir secepat kilat.</p>
+                                        <p class="text-secondary small mb-0 fw-semibold">Service container teroptimasi penuh untuk kecepatan pemrosesan kasir kilat.</p>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <div class="p-4 rounded-4 spec-card-new h-100 position-relative overflow-hidden">
-                                        <div class="d-flex align-items-start justify-content-between mb-3">
-                                            <div class="tech-icon-circle rounded-3 d-flex align-items-center justify-content-center text-accent shadow-xs">
-                                                <i class="bi bi-shield-lock-fill fs-4"></i>
+                                    <div class="bento-spec-card p-4 rounded-4 h-100 position-relative overflow-hidden">
+                                        <div class="d-flex align-items-center justify-content-between mb-3">
+                                            <div class="tech-icon-box rounded-3 d-flex align-items-center justify-content-center text-accent shadow-xs">
+                                                <i class="bi bi-shield-fill-check fs-4"></i>
                                             </div>
-                                            <span class="badge-sub-clean font-monospace text-xs px-2.5 py-1 rounded-pill">PROTECTION</span>
+                                            <span class="badge-sub-modern font-monospace text-xs px-2.5 py-1 rounded-pill">SECURITY</span>
                                         </div>
-                                        <span class="d-block text-muted text-uppercase fw-bold font-monospace tracking-wider mb-1" style="font-size: 0.7rem;">Advanced Security</span>
+                                        <span class="d-block text-muted text-uppercase fw-bold font-monospace tracking-wider mb-1" style="font-size: 0.65rem;">Data Protection</span>
                                         <h4 class="fw-black text-dark fs-5 font-monospace mb-2">AES-256 Encryption</h4>
-                                        <p class="text-secondary small mb-0 fw-semibold">Bcrypt hashing guard serta token enkripsi ganda untuk proteksi data mutlak.</p>
+                                        <p class="text-secondary small mb-0 fw-semibold">Hashing bcrypt berlapis serta enkripsi data sensitif tingkat tinggi.</p>
                                     </div>
                                 </div>
-                            </div>
-
-                            {{-- Highlight Callout Banner Keamanan --}}
-                            <div class="p-4 rounded-4 callout-modern-banner d-flex align-items-center justify-content-between flex-wrap gap-3 shadow-sm position-relative overflow-hidden">
-                                <div class="position-absolute end-0 bottom-0 opacity-05 pointer-events-none me-3 mb-n3">
-                                    <i class="bi bi-shield-fill-check" style="font-size: 6rem;"></i>
-                                </div>
-                                <div class="d-flex align-items-center gap-3.5 position-relative z-1">
-                                    <div class="p-3.5 rounded-4 bg-accent text-white shadow-md animate-pulse-slow">
-                                        <i class="bi bi-shield-fill-check fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="fw-extrabold text-dark mb-1 fs-6">Sistem Keamanan Terpadu</h5>
-                                        <p class="text-secondary small fw-semibold mb-0">Proteksi firewall aplikasi ketat untuk mencegah akses ilegal & manipulasi data.</p>
-                                    </div>
-                                </div>
-                                <span class="badge bg-white text-accent px-4 py-2.5 rounded-pill border fw-black text-xs shadow-sm font-monospace position-relative z-1">
-                                    <i class="bi bi-patch-check-fill me-1"></i> ENCRYPTED CORE
-                                </span>
                             </div>
 
                         </div>
@@ -157,13 +155,18 @@
 
                 </div>
 
-                {{-- Live Footer --}}
-                <div class="pt-4 border-top border-amber-subtle d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small font-monospace">
-                    <span class="fw-semibold">MaisonPOS Enterprise Ecosystem — Protected by Laravel Security Core.</span>
-                    <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
-                        <span class="text-accent fw-bold" id="live-clock"><i class="bi bi-clock-fill me-1"></i> 00:00:00 WIB</span>
-                        <span class="text-muted opacity-50">|</span>
-                        <span class="fw-bold text-dark">Engineered with Precision & Passion</span>
+                {{-- Live Footer Bar --}}
+                <div class="glass-footer-card p-4 rounded-4 d-flex flex-column flex-md-row align-items-center justify-content-between text-muted small font-monospace shadow-xs">
+                    <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
+                        <i class="bi bi-shield-shaded text-accent"></i>
+                        <span class="fw-bold text-dark">MaisonPOS Enterprise Ecosystem</span>
+                        <span>— Secured Core</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-white text-accent px-3 py-1.5 rounded-pill border shadow-xs" id="live-clock">
+                            <i class="bi bi-clock-fill me-1"></i> 00:00:00 WIB
+                        </span>
+                        <span class="fw-bold text-secondary d-none d-lg-inline">Engineered with Passion</span>
                     </div>
                 </div>
 
@@ -173,93 +176,99 @@
 </div>
 
 <style>
-    /* Styling Eksklusif Mewah Bernuansa Warm Gold & Bronze */
+    /* Styling Eksklusif Mewah & Modern Bento Glassmorphism */
     :root {
         --color-accent: #b37456;
         --color-accent-dark: #8c583f;
-        --color-accent-soft: #f7f0ec;
+        --color-accent-soft: #fbf5f1;
+        --border-color-custom: rgba(179, 116, 86, 0.18);
     }
 
-    .dashboard-wrapper {
-        background: linear-gradient(135deg, #fcfbf9 0%, #f4ede9 100%);
+    .developer-wrapper {
+        background: linear-gradient(135deg, #fbfaf8 0%, #f3ede8 100%);
         min-height: calc(100vh - 70px);
         position: relative;
     }
 
-    .ambient-glow {
+    /* Ambient Background Shapes */
+    .luxury-shape {
         position: absolute;
-        width: 450px;
-        height: 450px;
+        width: 500px;
+        height: 500px;
         border-radius: 50%;
-        filter: blur(80px);
+        filter: blur(90px);
         z-index: 1;
         pointer-events: none;
     }
-    .glow-one {
-        top: -10%;
+    .shape-one {
+        top: -15%;
         left: -10%;
-        background: rgba(179, 116, 86, 0.12);
-        animation: floatGlow 10s ease-in-out infinite alternate;
+        background: rgba(179, 116, 86, 0.1);
+        animation: floatShape 12s ease-in-out infinite alternate;
     }
-    .glow-two {
-        bottom: -10%;
+    .shape-two {
+        bottom: -15%;
         right: -10%;
-        background: rgba(212, 160, 134, 0.15);
-        animation: floatGlow 12s ease-in-out infinite alternate-reverse;
+        background: rgba(212, 160, 134, 0.12);
+        animation: floatShape 15s ease-in-out infinite alternate-reverse;
     }
 
-    @keyframes floatGlow {
+    @keyframes floatShape {
         0% { transform: translateY(0) scale(1); }
-        100% { transform: translateY(30px) scale(1.1); }
+        100% { transform: translateY(40px) scale(1.15); }
     }
 
-    .border-amber-subtle {
-        border-color: rgba(179, 116, 86, 0.15) !important;
+    /* Glass Cards & Bento Containers */
+    .glass-header-card, .bento-profile-card, .bento-main-card, .bento-spec-card, .glass-footer-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color-custom);
+        box-shadow: 0 20px 40px -15px rgba(44, 36, 32, 0.05);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
-    .border-amber-light {
-        border-color: rgba(179, 116, 86, 0.3) !important;
+    .glass-header-card:hover, .bento-main-card:hover, .bento-spec-card:hover, .bento-profile-card:hover {
+        border-color: rgba(179, 116, 86, 0.4);
+        box-shadow: 0 25px 50px -12px rgba(179, 116, 86, 0.12);
+        transform: translateY(-3px);
     }
 
-    .profile-wrapper {
-        perspective: 1000px;
-    }
-
+    /* Profile Avatar Effects */
     .profile-avatar {
-        width: 175px;
-        height: 175px;
+        width: 160px;
+        height: 160px;
         object-fit: cover;
-        border: 5px solid #ffffff;
-        box-shadow: 0 25px 50px rgba(179, 116, 86, 0.25);
+        border: 4px solid #ffffff;
+        box-shadow: 0 20px 40px rgba(179, 116, 86, 0.2);
         transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .profile-avatar:hover {
-        transform: scale(1.05) rotate(2deg);
-        box-shadow: 0 35px 70px rgba(179, 116, 86, 0.35);
+        transform: scale(1.06) rotate(2deg);
+        box-shadow: 0 30px 60px rgba(179, 116, 86, 0.3);
     }
 
     .avatar-glow-ring {
         position: absolute;
-        inset: -14px;
-        background: linear-gradient(135deg, rgba(179,116,86,0.4), rgba(179,116,86,0));
+        inset: -12px;
+        background: linear-gradient(135deg, rgba(179,116,86,0.35), rgba(179,116,86,0));
         border-radius: 50%;
-        filter: blur(20px);
+        filter: blur(18px);
         z-index: 0;
         animation: pulseGlow 3s ease-in-out infinite;
     }
 
     @keyframes pulseGlow {
-        0%, 100% { opacity: 0.6; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.08); }
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 0.9; transform: scale(1.08); }
     }
 
     .avatar-orbit-ring {
         position: absolute;
-        inset: -8px;
-        border: 2px dashed rgba(179, 116, 86, 0.4);
+        inset: -6px;
+        border: 2px dashed rgba(179, 116, 86, 0.35);
         border-radius: 50%;
-        animation: spinOrbit 20s linear infinite;
+        animation: spinOrbit 25s linear infinite;
         z-index: 0;
     }
 
@@ -268,8 +277,8 @@
     }
 
     .verified-badge {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         background-color: var(--color-accent) !important;
     }
 
@@ -279,157 +288,99 @@
 
     @keyframes bounceShort {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-5px); }
+        50% { transform: translateY(-4px); }
     }
 
-    .badge-role-elite {
-        background-color: rgba(179, 116, 86, 0.12);
-        color: var(--color-accent);
-        border: 1px solid rgba(179, 116, 86, 0.25);
-    }
-
-    .badge-system-glow {
-        background-color: #f7f2ef;
+    /* Badges & Icons Styling */
+    .badge-role-pill {
+        background-color: var(--color-accent-soft);
         color: var(--color-accent);
         border: 1px solid rgba(179, 116, 86, 0.2);
     }
 
-    .icon-clean {
-        width: 46px;
-        height: 46px;
-        background-color: #f7f2ef;
+    .badge-system-modern {
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
         border: 1px solid rgba(179, 116, 86, 0.2);
+    }
+
+    .badge-sub-modern {
+        background-color: var(--color-accent-soft);
+        color: var(--color-accent);
+        border: 1px solid rgba(179, 116, 86, 0.2);
+        font-weight: 700;
+    }
+
+    .icon-clean-sm {
+        width: 36px;
+        height: 36px;
+        background-color: var(--color-accent-soft);
+        border: 1px solid rgba(179, 116, 86, 0.15);
         flex-shrink: 0;
         transition: all 0.3s ease;
     }
 
-    .info-hover-item:hover {
-        background-color: #f7f2ef;
-        transform: translateX(6px);
-        border-color: rgba(179, 116, 86, 0.3);
+    .info-pill-item:hover {
+        background-color: var(--color-accent-soft);
+        transform: translateX(4px);
     }
 
-    .info-hover-item:hover .icon-clean {
+    .info-pill-item:hover .icon-clean-sm {
         background-color: var(--color-accent);
         color: #ffffff !important;
-        transform: scale(1.1);
+    }
+
+    .tech-icon-box {
+        width: 44px;
+        height: 44px;
+        background-color: var(--color-accent-soft);
+        border: 1px solid rgba(179, 116, 86, 0.2);
+    }
+
+    .icon-shield-box {
+        width: 40px;
+        height: 40px;
+        background-color: var(--color-accent-soft);
+        border: 1px solid rgba(179, 116, 86, 0.2);
     }
 
     .text-accent {
         color: var(--color-accent) !important;
     }
 
-    .bg-accent {
-        background-color: var(--color-accent) !important;
-    }
-
     .bg-accent-soft {
         background-color: var(--color-accent-soft);
     }
 
-    .text-gradient-title {
+    .text-gradient-main {
         background: linear-gradient(135deg, #2b211c 0%, #b37456 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
-    .text-gradient-name {
-        background: linear-gradient(135deg, #2b211c 0%, #b37456 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .spec-card-new {
-        background-color: #ffffff;
-        border: 1px solid rgba(179, 116, 86, 0.2);
-        box-shadow: 0 10px 30px rgba(44, 36, 32, 0.04);
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-
-    .spec-card-new:hover {
-        transform: translateY(-6px);
-        border-color: var(--color-accent);
-        box-shadow: 0 20px 40px rgba(179, 116, 86, 0.12);
-    }
-
-    .tech-icon-circle {
-        width: 48px;
-        height: 48px;
-        background-color: var(--color-accent-soft);
-        border: 1px solid rgba(179, 116, 86, 0.2);
-        transition: transform 0.3s ease;
-    }
-
-    .spec-card-new:hover .tech-icon-circle {
-        transform: scale(1.1) rotate(-5deg);
-        background-color: var(--color-accent);
-        color: #ffffff !important;
-    }
-
-    .badge-sub-clean {
-        background-color: var(--color-accent-soft);
-        color: var(--color-accent);
-        border: 1px solid rgba(179, 116, 86, 0.15);
-        font-weight: 700;
-    }
-
-    .callout-modern-banner {
-        background: linear-gradient(135deg, #fcf5f1 0%, #f1e6e0 100%);
-        border: 1px solid rgba(179, 116, 86, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .callout-modern-banner:hover {
-        box-shadow: 0 15px 35px rgba(179, 116, 86, 0.12);
-        transform: translateY(-2px);
-    }
-
-    .live-status-pill {
-        border-color: rgba(179, 116, 86, 0.25) !important;
-    }
-
-    .status-pulse-dot {
-        position: relative;
-        width: 10px;
-        height: 10px;
-        background-color: var(--color-accent);
-        border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 10px var(--color-accent);
-    }
-
-    .pulse-ring {
-        position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
-        border: 2px solid var(--color-accent);
-        border-radius: 50%;
-        animation: pulseRingAnim 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-    }
-
-    @keyframes pulseRingAnim {
-        0% { transform: scale(0.95); opacity: 1; }
-        50% { transform: scale(2.2); opacity: 0; }
-        100% { transform: scale(0.95); opacity: 0; }
-    }
-
-    .dot-amber {
+    .pulse-dot-mini {
         width: 7px;
         height: 7px;
         background-color: var(--color-accent);
         border-radius: 50%;
         display: inline-block;
         box-shadow: 0 0 6px var(--color-accent);
+        animation: pulseDotAnim 1.5s infinite;
     }
 
-    .animate-spin-slow {
-        animation: spinSlow 8s linear infinite;
+    @keyframes pulseDotAnim {
+        0% { transform: scale(0.95); opacity: 1; }
+        50% { transform: scale(1.5); opacity: 0.4; }
+        100% { transform: scale(0.95); opacity: 1; }
     }
 
-    @keyframes spinSlow {
-        100% { transform: rotate(360deg); }
+    .dot-amber {
+        width: 6px;
+        height: 6px;
+        background-color: var(--color-accent);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 5px var(--color-accent);
     }
 
     .animate-float {
@@ -438,16 +389,7 @@
 
     @keyframes floatIcon {
         0% { transform: translateY(0); }
-        100% { transform: translateY(-4px); }
-    }
-
-    .animate-pulse-slow {
-        animation: pulseSlow 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseSlow {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        100% { transform: translateY(-3px); }
     }
 </style>
 
@@ -461,7 +403,7 @@
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const clockElement = document.getElementById('live-clock');
             if (clockElement) {
-                clockElement.innerHTML = `<i class="bi bi-clock-fill me-1"></i> ${hours}:${minutes}:${seconds} WIB`;
+                clockElement.innerHTML = `<i class="bi bi-clock-fill me-1 text-accent"></i> ${hours}:${minutes}:${seconds} WIB`;
             }
         }
         setInterval(updateLiveClock, 1000);

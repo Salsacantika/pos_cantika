@@ -17,17 +17,29 @@ class PenjualanController extends Controller
     public function index(SearchRequest $request)
     {
         $user = Auth::user();
-        $keyword = $request->input('search');
-
+        
         $sales = Penjualan::query()
-            // 🔒 Filter berdasarkan role
+            // 🔒 Filter berdasarkan role kasir
             ->when($user->role->name === 'kasir', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
-            // 🔍 Search nama user
-            ->when($keyword, function ($query) use ($keyword) {
-                $query->whereHas('user', function ($q) use ($keyword) {
-                    $q->where('name', 'like', '%' . $keyword . '%');
+            // 🎯 Filter berdasarkan Status dari Modal
+            ->when($request->status, function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            // 📅 Filter berdasarkan Tanggal dari Modal
+            ->when($request->tanggal, function ($query) use ($request) {
+                $query->whereDate('created_at', $request->tanggal);
+            })
+            // 🔍 Search teks biasa (opsional jika masih dipakai)
+            ->when($request->search, function ($query) use ($request) {
+                $keyword = $request->search;
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('id', 'like', '%' . $keyword . '%')
+                      ->orWhere('metode_pembayaran', 'like', '%' . $keyword . '%')
+                      ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                          $userQuery->where('name', 'like', '%' . $keyword . '%');
+                      });
                 });
             })
             ->latest()
@@ -43,14 +55,12 @@ class PenjualanController extends Controller
     public function create(Request $request)
     {
         if (!session('keep_cart')) {
-            // 🧹 Bersihkan transaksi pending lama milik user ini (jika ada)
             $oldPending = Penjualan::where('user_id', Auth::id())
                 ->where('status', 'pending')
                 ->first();
 
             if ($oldPending) {
                 DB::transaction(function () use ($oldPending) {
-                    // kembalikan stok dari item yang sempat ditambahkan
                     foreach ($oldPending->itemPenjualan as $item) {
                         $item->produk->increment('stok', $item->kuantitas);
                     }
@@ -60,7 +70,6 @@ class PenjualanController extends Controller
                 });
             }
 
-            // 🆕 Buat transaksi baru yang benar-benar kosong
             $sale = Penjualan::create([
                 'user_id' => Auth::id(),
                 'status' => 'pending',
@@ -69,7 +78,6 @@ class PenjualanController extends Controller
             ]);
 
         } else {
-            // 🔁 Masih dalam proses belanja yang sama
             $sale = Penjualan::firstOrCreate(
                 [
                     'user_id' => Auth::id(),
@@ -108,7 +116,6 @@ class PenjualanController extends Controller
      */
     public function show(Penjualan $penjualan)
     {
-        // Load relasi user dan itemPenjualan beserta data produknya
         $penjualan->load(['user', 'itemPenjualan.produk']);
 
         return view('penjualan.show', compact('penjualan'));
@@ -135,7 +142,6 @@ class PenjualanController extends Controller
      */
     public function update(Request $request, Penjualan $penjualan)
     {
-        // Perbaikan validasi agar mendukung huruf kecil/besar (lowercase/uppercase)
         $request->validate([
             'payment_method' => 'required|string|in:cash,qris,CASH,QRIS'
         ]);
@@ -149,7 +155,6 @@ class PenjualanController extends Controller
         }
 
         DB::transaction(function () use ($penjualan, $request) {
-            // 🔄 Hitung ulang total (anti manipulasi)
             $total = $penjualan->itemPenjualan()->sum('subtotal');
 
             $penjualan->update([
@@ -177,14 +182,10 @@ class PenjualanController extends Controller
 
         DB::transaction(function () use ($penjualan) {
             foreach ($penjualan->itemPenjualan as $item) {
-                // 🔄 kembalikan stok
                 $item->produk->increment('stok', $item->kuantitas);
             }
 
-            // ❌ hapus item
             $penjualan->itemPenjualan()->delete();
-
-            // ❌ hapus penjualan
             $penjualan->delete();
         });
 
