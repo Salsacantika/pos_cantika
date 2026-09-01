@@ -14,7 +14,6 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jenis_id' => 'required|exists:jenis,id',
             'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'nama' => 'required|string|max:255',
             'harga_beli' => 'required|integer|min:0',
@@ -26,8 +25,6 @@ class StoreRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'jenis_id.required' =>'Jenis produk wajib dipilih.',
-            'jenis_id.exists' =>'Jenis produk tidak valid.',
             'foto.required' => 'Foto produk wajib dipilih.',
             'foto.image' => 'File yang diupload harus berupa gambar.',
             'foto.mimes' => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',

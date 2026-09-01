@@ -6,7 +6,6 @@ use App\Http\Requests\SearchRequest;
 use App\Http\Requests\Produk\UpdateRequest;
 use App\Http\Requests\Produk\StoreRequest;
 use App\Models\Produk;
-use App\Models\Jenis;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +20,7 @@ class ProdukController extends Controller
 
         $keyword = $request->input('search');
 
-        $query = Produk::with(['user', 'jenis']);
+        $query = Produk::with('user');
 
         if ($keyword) {
             $products = $query->where('nama', 'like', '%' . $keyword . '%')
@@ -44,9 +43,7 @@ class ProdukController extends Controller
     {
         $this->authorize('create', Produk::class);
 
-        $jenisList = Jenis::all();
-
-        return view('produk.create', compact('jenisList'));
+        return view('produk.create');
     }
 
     /**
@@ -57,16 +54,12 @@ class ProdukController extends Controller
         $this->authorize('create', Produk::class);
 
         $data = $request->validated();
+
         $data['user_id'] = Auth::id();
 
-        // Mapping jenis_id dari form ke id_jenis di database
-        if (isset($data['jenis_id'])) {
-            $data['id_jenis'] = $data['jenis_id'];
-            unset($data['jenis_id']);
-        }
-
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('products', 'public');
+            $data['foto'] = $request->file('foto')
+                ->store('products', 'public');
         }
 
         Produk::create($data);
@@ -91,11 +84,8 @@ class ProdukController extends Controller
     {
         $this->authorize('update', $produk);
 
-        $jenisList = Jenis::all();
-
         return view('produk.edit', [
-            'product' => $produk,
-            'jenisList' => $jenisList
+            'product' => $produk
         ]);
     }
 
@@ -107,12 +97,6 @@ class ProdukController extends Controller
         $this->authorize('update', $produk);
 
         $data = $request->validated();
-
-        // Mapping jenis_id dari form ke id_jenis di database
-        if (isset($data['jenis_id'])) {
-            $data['id_jenis'] = $data['jenis_id'];
-            unset($data['jenis_id']);
-        }
 
         if ($request->hasFile('foto')) {
             if (
