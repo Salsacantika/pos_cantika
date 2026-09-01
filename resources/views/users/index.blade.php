@@ -151,15 +151,7 @@
     </div>
 
     {{-- Alert Messages --}}
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 py-3" role="alert" style="background-color: #f0fdf4; color: #166534; border-left: 5px solid #22c55e !important;">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle-fill fs-5"></i>
-                <span class="fw-semibold">{{ session('success') }}</span>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+
 
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4 py-3" role="alert" style="background-color: #fef2f2; color: #991b1b; border-left: 5px solid #ef4444 !important;">

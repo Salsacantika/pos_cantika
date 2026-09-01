@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProdukRequest extends FormRequest
+class storeRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,26 +14,21 @@ class StoreProdukRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jenis_id'   => 'required|exists:jenis,id',
-            'nama'       => 'required|string|max:255',
-            'harga_beli' => 'required|numeric|min:0',
-            'harga_jual' => 'required|numeric|min:0',
-            'stok'       => 'required|integer|min:0',
-            'foto'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role_id'  => 'required|exists:roles,id',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'jenis_id.required'   => 'Jenis produk wajib dipilih.',
-            'jenis_id.exists'     => 'Jenis produk yang dipilih tidak valid.',
-            'nama.required'       => 'Nama produk wajib diisi.',
-            'harga_beli.required' => 'Harga beli wajib diisi.',
-            'harga_jual.required' => 'Harga jual wajib diisi.',
-            'stok.required'       => 'Stok wajib diisi.',
-            'foto.image'          => 'File yang diunggah harus berupa gambar.',
-            'foto.max'            => 'Ukuran foto maksimal adalah 2MB.',
+            'name.required'     => 'Nama wajib diisi.',
+            'email.required'    => 'Email wajib diisi.',
+            'email.unique'      => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'role_id.required'  => 'Role wajib dipilih.',
         ];
     }
 }
