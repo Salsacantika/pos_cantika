@@ -4,11 +4,18 @@
 <div class="container-fluid px-4 py-4">
 
     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-        <h4 class="fw-bold mb-4" style="color: #1a1a1a;">Tambah Produk Baru</h4>
+        <h4 class="fw-bold mb-4" style="color: #1a1a1a;">
+            {{ isset($product) ? 'Edit Produk' : 'Tambah Produk Baru' }}
+        </h4>
 
-        {{-- FORM UTAMA PEMBUNGKUS --}}
-        <form action="{{ route('produk.store') }}" method="POST" enctype="multipart/form-data">
+        {{-- FORM UTAMA PEMBUNGKUS (Dibuat dinamis untuk Store dan Update) --}}
+        <form action="{{ isset($product) ? route('produk.update', $product->id) : route('produk.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            
+            {{-- Jika sedang edit, tambahkan method PUT agar larinya ke update() --}}
+            @if(isset($product))
+                @method('PUT')
+            @endif
 
             {{-- Style Khusus Form Elegan --}}
             <style>
