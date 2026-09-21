@@ -419,16 +419,35 @@
                 {{-- Footer & Panel Checkout --}}
                 <div class="card-footer bg-white p-4 border-top" style="border-color: var(--lux-border) !important;">
 
-                    <!-- Panel Total -->
-                    <div class="lux-receipt-box p-3 mb-3 d-flex justify-content-between align-items-center shadow-sm">
-                        <div>
-                            <span class="d-block small fw-bold text-uppercase mb-1" style="font-size: 10px; color: var(--lux-primary); letter-spacing: 0.8px;">TOTAL TAGIHAN PEMBAYARAN</span>
-                            <span class="fw-bold fs-3 text-dark" id="total-tagihan-text" data-total="{{ (int) $sale->total_pembayaran }}">
-                                Rp {{ number_format($sale->total_pembayaran, 0, ',', '.') }}
+                    <!-- Panel Total & Diskon Otomatis -->
+                    @php
+                        $subtotalBelanja = $sale->itemPenjualan->sum('subtotal');
+                        $diskonNominal = $subtotalBelanja > 1000000 ? $subtotalBelanja * 0.10 : 0;
+                        $totalAkhir = $subtotalBelanja - $diskonNominal;
+                    @endphp
+                    <div class="lux-receipt-box p-3 mb-3 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-secondary fw-semibold">Subtotal</span>
+                            <span class="small fw-bold text-dark" id="subtotal-text" data-subtotal="{{ (int) $subtotalBelanja }}">
+                                Rp {{ number_format($subtotalBelanja, 0, ',', '.') }}
                             </span>
                         </div>
-                        <div class="text-end bg-white p-2 rounded-3 border shadow-sm" style="border-color: #ebd6b5 !important;">
-                            <i class="bi bi-receipt-cutoff fs-3" style="color: var(--lux-gold);"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color: #ebd6b5 !important;">
+                            <span class="small text-secondary fw-semibold">Diskon 10% {!! $subtotalBelanja > 1000000 ? '<span class="badge bg-success text-white ms-1" style="font-size: 9px;">Aktif</span>' : '' !!}</span>
+                            <span class="small fw-bold text-danger" id="diskon-text" data-diskon="{{ (int) $diskonNominal }}">
+                                - Rp {{ number_format($diskonNominal, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="d-block small fw-bold text-uppercase mb-1" style="font-size: 10px; color: var(--lux-primary); letter-spacing: 0.8px;">TOTAL PEMBAYARAN</span>
+                                <span class="fw-bold fs-3 text-dark" id="total-tagihan-text" data-total="{{ (int) $totalAkhir }}">
+                                    Rp {{ number_format($totalAkhir, 0, ',', '.') }}
+                                </span>
+                            </div>
+                            <div class="text-end bg-white p-2 rounded-3 border shadow-sm" style="border-color: #ebd6b5 !important;">
+                                <i class="bi bi-receipt-cutoff fs-3" style="color: var(--lux-gold);"></i>
+                            </div>
                         </div>
                     </div>
 
@@ -514,7 +533,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // ---------- Elemen ----------
         const totalEl        = document.getElementById('total-tagihan-text');
-        const totalBelanja   = parseInt(totalEl ? totalEl.dataset.total : 0, 10) || 0;
+        let totalBelanja     = parseInt(totalEl ? totalEl.dataset.total : 0, 10) || 0;
         const paymentSelect  = document.getElementById('paymentMethodSelect');
         const cashContainer  = document.getElementById('cashContainer');
         const qrisContainer  = document.getElementById('qrisImageContainer');
@@ -558,7 +577,6 @@
                 const qty  = parseInt(input.value, 10) || 0;
                 const over = stok > 0 && qty > stok;
 
-                // setCustomValidity: browser otomatis menolak submit + menampilkan pesan ini
                 input.setCustomValidity(over ? pesanStok(stok) : '');
                 input.classList.toggle('qty-invalid', over);
 
@@ -599,14 +617,13 @@
         document.querySelectorAll('.qty-cart-input').forEach(function (input) {
             const form = input.closest('form');
 
-            cekItemKeranjang(input);            // cek saat halaman dimuat
+            cekItemKeranjang(input);            
 
             input.addEventListener('input', function () {
                 cekItemKeranjang(input);
                 updateTombolCheckout();
             });
 
-            // Dulu: onchange="this.form.submit()". Sekarang cek stok dulu.
             input.addEventListener('change', function () {
                 if (!(parseInt(input.value, 10) >= 1)) input.value = 1;
 
@@ -626,7 +643,6 @@
                 }
             });
 
-            // Jaga-jaga kalau user menekan Enter
             form.addEventListener('submit', function (e) {
                 if (!cekItemKeranjang(input)) {
                     e.preventDefault();

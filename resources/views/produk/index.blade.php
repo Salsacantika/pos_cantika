@@ -170,37 +170,27 @@
         vertical-align: middle;
         white-space: nowrap;
     }
+
+    .best-empty {
+        background: #ffffff;
+        border: 1px dashed var(--lux-border);
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 13px;
+    }
 </style>
 
 @php
-    // Fallback otomatis ambil data Best Seller langsung dari database jika controller belum mengirimnya
-    use Illuminate\Support\Facades\DB;
-
-    if (!isset($bestSellers) || $bestSellers->isEmpty()) {
-        // Cek struktur tabel transaksi/penjualan yang umum (sesuaikan nama tabel detail jika beda, misal: detail_penjualans / transaksi_details)
-        // Kode ini otomatis mendeteksi total jumlah produk yang terjual
-        try {
-            $bestSellers = DB::table('produks')
-                ->join('detail_penjualans', 'produks.id', '=', 'detail_penjualans.produk_id')
-                ->select('produks.*', DB::raw('SUM(detail_penjualans.jumlah) as total_terjual'))
-                ->groupBy('produks.id')
-                ->orderByDesc('total_terjual')
-                ->limit(3)
-                ->get();
-        } catch (\Exception $e) {
-            // Kalau tabel detail belum ada, ambil produk secara random/stok terbanyak agar card tetap tampil cantik
-            $bestSellers = App\Models\Produk::orderBy('stok', 'desc')->limit(3)->get()->map(function($item) {
-                $item->total_terjual = rand(10, 50); // Dummy data sementara jika belum ada transaksi
-                return $item;
-            });
-        }
-    }
-    
-    $bestSellerIds = $bestSellers->pluck('id')->all();
+    // Data best seller dikirim dari ProdukController@index (dihitung dari transaksi asli).
+    // Tidak ada lagi data dummy/random. Kalau belum ada transaksi, section menampilkan pesan kosong.
+    $bestSellers   = $bestSellers ?? collect();
+    $bestSellerIds = collect($bestSellerIds ?? $bestSellers->pluck('id'))->values()->all();
 @endphp
 
 <div class="container-fluid py-4 px-lg-4">
-    
+
     {{-- Header Section --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
@@ -230,18 +220,20 @@
     </div>
 
     {{-- ==================== BEST SELLER CARD SECTION ==================== --}}
-    @if($bestSellers->isNotEmpty())
-        <div class="mb-4">
-            <div class="d-flex align-items-center gap-2 mb-3 px-1">
-                <i class="bi bi-trophy-fill fs-5" style="color: var(--lux-gold);"></i>
-                <span class="fw-bold text-uppercase" style="font-size: 12px; letter-spacing: 1px; color: var(--lux-primary);">
-                    Produk Best Seller
-                </span>
+    <div class="mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3 px-1">
+            <i class="bi bi-trophy-fill fs-5" style="color: var(--lux-gold);"></i>
+            <span class="fw-bold text-uppercase" style="font-size: 12px; letter-spacing: 1px; color: var(--lux-primary);">
+                Produk Best Seller
+            </span>
+            @if($bestSellers->isNotEmpty())
                 <span class="text-muted" style="font-size: 11.5px;">
                     Top {{ $bestSellers->count() }} produk dengan performa penjualan tertinggi
                 </span>
-            </div>
+            @endif
+        </div>
 
+        @if($bestSellers->isNotEmpty())
             <div class="row g-4">
                 @foreach ($bestSellers as $best)
                     @php $rank = $loop->iteration; @endphp
@@ -286,12 +278,17 @@
                     </div>
                 @endforeach
             </div>
-        </div>
-    @endif
+        @else
+            <div class="best-empty">
+                <i class="bi bi-graph-up d-block fs-3 mb-2 opacity-50"></i>
+                Belum ada data penjualan. Produk terlaris akan muncul otomatis setelah ada transaksi.
+            </div>
+        @endif
+    </div>
 
     {{-- Card Main Container --}}
     <div class="card lux-master-frame">
-        
+
         {{-- Filter & Search Header --}}
         <div class="card-header bg-white pt-4 pb-3 border-0 px-4">
             <form action="{{ route('produk.index') }}" method="GET">
@@ -306,7 +303,7 @@
                             <span class="input-group-text bg-white border-0 ps-4 text-muted">
                                 <i class="bi bi-search" style="color: var(--lux-primary);"></i>
                             </span>
-                            <input 
+                            <input
                                 type="text"
                                 name="search"
                                 value="{{ request('search') }}"
@@ -363,9 +360,10 @@
                             </td>
                             <td>
                                 <span class="text-dark fw-bold">{{ $product->nama }}</span>
-                                @if(in_array($product->id, $bestSellerIds))
+                                @php $bestRank = array_search($product->id, $bestSellerIds); @endphp
+                                @if($bestRank !== false)
                                     <span class="badge-best-seller ms-1" title="Produk terlaris">
-                                        <i class="bi bi-fire"></i> Best Seller #{{ array_search($product->id, $bestSellerIds) + 1 }}
+                                        <i class="bi bi-fire"></i> Best Seller #{{ $bestRank + 1 }}
                                     </span>
                                 @endif
                             </td>

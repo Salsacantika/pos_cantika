@@ -33,7 +33,20 @@ class ProdukController extends Controller
                 ->withQueryString();
         }
 
-        return view('produk.index', compact('products'));
+        // Best seller: dihitung dari transaksi yang sudah selesai (bukan keranjang pending)
+        $bestSellers = Produk::withSum(['itemPenjualan as total_terjual' => function ($q) {
+                $q->whereHas('penjualan', function ($p) {
+                    $p->where('status', '!=', 'pending');
+                });
+            }], 'kuantitas')
+            ->having('total_terjual', '>', 0)
+            ->orderByDesc('total_terjual')
+            ->take(3)
+            ->get();
+
+        $bestSellerIds = $bestSellers->pluck('id')->values();
+
+        return view('produk.index', compact('products', 'bestSellers', 'bestSellerIds'));
     }
 
     /**
