@@ -8,6 +8,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PenjualanController extends Controller
 {
@@ -17,7 +18,7 @@ class PenjualanController extends Controller
     public function index(SearchRequest $request)
     {
         $user = Auth::user();
-        
+
         $sales = Penjualan::query()
             // 🔒 Filter berdasarkan role kasir
             ->when($user->role->name === 'kasir', function ($query) use ($user) {
@@ -36,10 +37,10 @@ class PenjualanController extends Controller
                 $keyword = $request->search;
                 $query->where(function ($q) use ($keyword) {
                     $q->where('id', 'like', '%' . $keyword . '%')
-                      ->orWhere('metode_pembayaran', 'like', '%' . $keyword . '%')
-                      ->orWhereHas('user', function ($userQuery) use ($keyword) {
-                          $userQuery->where('name', 'like', '%' . $keyword . '%');
-                      });
+                        ->orWhere('metode_pembayaran', 'like', '%' . $keyword . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($keyword) {
+                            $userQuery->where('name', 'like', '%' . $keyword . '%');
+                        });
                 });
             })
             ->latest()
@@ -54,7 +55,11 @@ class PenjualanController extends Controller
      */
     public function create(Request $request)
     {
-        if (!session('keep_cart')) {
+        // [PERBAIKAN] Keranjang tidak lagi terhapus saat user mencari produk / refresh
+        // di halaman kasir yang sama. Reset hanya terjadi kalau masuk dari halaman lain.
+        $masihDiHalamanKasir = Str::startsWith(url()->previous(), route('penjualan.create'));
+
+        if (!session('keep_cart') && !$masihDiHalamanKasir) {
             $oldPending = Penjualan::where('user_id', Auth::id())
                 ->where('status', 'pending')
                 ->first();
@@ -76,7 +81,6 @@ class PenjualanController extends Controller
                 'total_pembayaran' => 0,
                 'metode_pembayaran' => 'cash'
             ]);
-
         } else {
             $sale = Penjualan::firstOrCreate(
                 [
@@ -93,8 +97,8 @@ class PenjualanController extends Controller
         $keyword = $request->input('search');
 
         $products = Produk::when($keyword, function ($query) use ($keyword) {
-                $query->where('nama', 'like', '%' . $keyword . '%');
-            })
+            $query->where('nama', 'like', '%' . $keyword . '%');
+        })
             ->orderBy('nama')
             ->get();
 
@@ -138,7 +142,7 @@ class PenjualanController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage (Proses Checkout & Diskon).
      */
     public function update(Request $request, Penjualan $penjualan)
     {
@@ -147,26 +151,49 @@ class PenjualanController extends Controller
         ]);
 
         if (strtolower($penjualan->status) !== 'pending') {
-            return back()->with('errors', 'Transaksi sudah diproses');
+            return back()->with('error', 'Transaksi sudah diproses');
         }
 
         if ($penjualan->itemPenjualan()->count() === 0) {
-            return back()->with('errors', 'Keranjang masih kosong');
+            return back()->with('error', 'Keranjang masih kosong');
+        }
+
+        // [PERBAIKAN] Cek stok: kalau ada produk yang stoknya sudah minus,
+        // berarti jumlah di keranjang melebihi sisa stok -> checkout ditolak dengan keterangan.
+        $penjualan->load('itemPenjualan.produk');
+        foreach ($penjualan->itemPenjualan as $item) {
+            if ($item->produk && $item->produk->stok < 0) {
+                return back()->with(
+                    'error',
+                    'Jumlah "' . $item->produk->nama . '" melebihi sisa stok (kelebihan '
+                        . abs($item->produk->stok) . ' unit). Kurangi jumlahnya dulu.'
+                );
+            }
         }
 
         DB::transaction(function () use ($penjualan, $request) {
-            $total = $penjualan->itemPenjualan()->sum('subtotal');
+            // 1. Hitung subtotal awal dari keranjang
+            $subtotal = $penjualan->itemPenjualan()->sum('subtotal');
 
+            // 2. Logika Diskon 10% jika total > Rp 1.000.000
+            $diskon = 0;
+            $totalAkhir = $subtotal;
+            if ($subtotal > 1000000) {
+                $diskon = $subtotal * 0.10; // Potongan 10%
+                $totalAkhir = $subtotal - $diskon;
+            }
+
+            // 3. Update data penjualan ke database
             $penjualan->update([
                 'metode_pembayaran' => strtolower($request->payment_method),
-                'total_pembayaran'  => $total,
+                'total_pembayaran'  => $totalAkhir,
                 'status'            => 'completed'
             ]);
         });
 
         return redirect()
             ->route('penjualan.index')
-            ->with('success', 'Transaksi berhasil diselesaikan');
+            ->with('success', 'Transaksi berhasil diselesaikan (Otomatis Diskon 10% jika > Rp 1 Juta)');
     }
 
     /**
@@ -177,7 +204,7 @@ class PenjualanController extends Controller
         $this->authorize('delete', $penjualan);
 
         if (strtolower($penjualan->status) !== 'pending' && strtolower($penjualan->status) !== 'open') {
-            return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
+            return redirect()->route('penjualan.index')->with('error', 'Transaksi sudah selesai tidak bisa dibatalkan');
         }
 
         DB::transaction(function () use ($penjualan) {

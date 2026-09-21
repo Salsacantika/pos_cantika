@@ -26,7 +26,6 @@
         letter-spacing: -0.5px;
     }
 
-    /* Master Frame High-End */
     .lux-master-frame {
         border: 1px solid var(--lux-border);
         border-radius: 24px;
@@ -35,7 +34,6 @@
         overflow: hidden;
     }
 
-    /* Produk Luxury Card */
     .lux-product-card {
         background: #ffffff;
         border: 1px solid #f1e6db;
@@ -81,7 +79,25 @@
         font-weight: 700;
     }
 
-    /* Tombol Luxury Primary */
+    /* ===== VALIDASI STOK ===== */
+    .qty-invalid {
+        border: 1px solid #b42318 !important;
+        background-color: #fdecec !important;
+        color: #b42318 !important;
+    }
+    .stock-warning-row td {
+        background: #fdecec;
+        border-top: 0 !important;
+        color: #b42318;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .catalog-warning {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #b42318;
+    }
+
     .btn-lux-primary {
         background: linear-gradient(135deg, #8e5b42 0%, #6d432f 100%);
         border: none;
@@ -96,8 +112,36 @@
         transform: scale(1.02);
         box-shadow: 0 8px 20px rgba(142, 91, 66, 0.25);
     }
+    .btn-lux-primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 
-    /* Custom Header Tabel */
+    .btn-lux-delete {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid #f8c9c5;
+        background: #fdecec;
+        color: #b42318;
+        transition: all 0.2s ease;
+    }
+    .btn-lux-delete:hover:not(:disabled) {
+        background: #b42318;
+        color: #ffffff;
+        border-color: #b42318;
+    }
+    .btn-lux-delete:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     .lux-table-header {
         background-color: #faf6f0;
         color: #734732;
@@ -107,14 +151,12 @@
         border-bottom: 2px solid #f1e6db;
     }
 
-    /* Struk Resi Preview Mewah */
     .lux-receipt-box {
         background: linear-gradient(135deg, #faf6f0 0%, #f4ebd0 100%);
         border: 1px solid #ebd6b5;
         border-radius: 18px;
     }
 
-    /* Scrollbar Halus */
     .custom-scroll::-webkit-scrollbar {
         width: 6px;
     }
@@ -132,8 +174,8 @@
 </style>
 
 <div class="container-fluid py-4 px-lg-4">
-    
-    <!-- Header Tanpa Statistik Card -->
+
+    <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h2 class="page-title mb-1 fs-3">
@@ -154,26 +196,26 @@
         </div>
     </div>
 
-    <!-- Layout Utama POS (Kiri: Katalog, Kanan: Keranjang) -->
+    <!-- Layout Utama POS -->
     <div class="row g-4">
-        
+
         {{-- ==================== KATALOG PRODUK (KIRI) ==================== --}}
         <div class="col-lg-7">
             <div class="card lux-master-frame h-100">
-                <!-- Search Bar Mewah -->
                 <div class="card-header bg-white pt-4 pb-3 border-0 px-4">
                     <div class="d-flex flex-column gap-3">
-                        <form method="GET" action="{{ route('penjualan.create') }}">
+                        <form method="GET" action="{{ route('penjualan.create') }}" id="form-search">
                             <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden" style="border: 1px solid var(--lux-border);">
                                 <span class="input-group-text bg-white border-0 ps-4 text-muted">
                                     <i class="bi bi-search" style="color: var(--lux-primary);"></i>
                                 </span>
                                 <input type="text"
                                        name="search"
+                                       id="search-input"
                                        value="{{ request('search') }}"
                                        class="form-control border-0 shadow-none ps-2"
                                        placeholder="Cari koleksi produk eksklusif..."
-                                       onkeyup="this.form.submit()"
+                                       autocomplete="off"
                                        style="font-size: 14px;">
                                 @if(request('search'))
                                     <a href="{{ route('penjualan.create') }}" class="btn btn-light border-0 d-flex align-items-center px-3 text-muted" title="Reset">
@@ -192,11 +234,10 @@
                     </div>
                 </div>
 
-                <!-- Grid Katalog Produk -->
                 <div class="card-body px-4 py-2 custom-scroll" style="max-height: 60vh; overflow-y: auto;">
                     <div class="row g-3">
                         @php
-                            // 🔧 Atur ambang batas "stok menipis" di sini
+                            // Ambang batas "stok menipis"
                             $lowStockThreshold = 5;
                         @endphp
                         @forelse ($products as $product)
@@ -220,7 +261,7 @@
                                     <div>
                                         <div class="d-flex align-items-center gap-3 mb-3">
                                             <div class="flex-shrink-0 bg-light p-1 rounded-3 border" style="border-color: #f1e6db !important;">
-                                                <img src="{{ asset('storage/'.$product->foto) }}"
+                                                <img src="{{ asset('storage/' . $product->foto) }}"
                                                      alt="{{ $product->nama }}"
                                                      class="rounded-2"
                                                      style="width: 58px; height: 58px; object-fit: cover;">
@@ -233,30 +274,35 @@
                                                 @if ($isOutOfStock)
                                                     <div class="lux-stock-note text-danger mt-1">Stok: 0</div>
                                                 @elseif ($isLowStock)
-                                                    <div class="lux-stock-note" style="color: #a15c00;" >Sisa stok: {{ $product->stok }}</div>
+                                                    <div class="lux-stock-note" style="color: #a15c00;">Sisa stok: {{ $product->stok }}</div>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="d-flex align-items-center gap-2 pt-2 border-top" style="border-color: #f8fafc !important;">
-                                        <div style="width: 75px;">
-                                            <input type="number" 
-                                                   name="quantity" 
-                                                   value="1" 
-                                                   min="1"
-                                                   max="{{ $product->stok }}"
-                                                   class="form-control form-control-sm text-center fw-bold rounded-pill bg-light border-0"
-                                                   {{ ($sale->status === 'completed' || $isOutOfStock) ? 'readonly' : '' }}>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 pt-2 border-top" style="border-color: #f8fafc !important;">
+                                            <div style="width: 75px;">
+                                                {{-- VALIDASI STOK: data-stok dipakai JS untuk cek qty --}}
+                                                <input type="number"
+                                                       name="quantity"
+                                                       value="1"
+                                                       min="1"
+                                                       data-stok="{{ $product->stok }}"
+                                                       class="qty-catalog-input form-control form-control-sm text-center fw-bold rounded-pill bg-light border-0"
+                                                       {{ ($sale->status === 'completed' || $isOutOfStock) ? 'readonly' : '' }}>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <button type="submit"
+                                                        class="btn btn-lux-primary btn-sm w-100 rounded-pill py-1 d-flex align-items-center justify-content-center gap-1 shadow-sm"
+                                                        {{ ($sale->status === 'completed' || $isOutOfStock) ? 'disabled' : '' }}
+                                                        title="Tambah Item">
+                                                    <i class="bi bi-bag-plus-fill"></i> {{ $isOutOfStock ? 'Habis' : 'Tambah' }}
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <button type="submit" 
-                                                    class="btn btn-lux-primary btn-sm w-100 rounded-pill py-1 d-flex align-items-center justify-content-center gap-1 shadow-sm"
-                                                    {{ ($sale->status === 'completed' || $isOutOfStock) ? 'disabled' : '' }}
-                                                    title="Tambah Item">
-                                                <i class="bi bi-bag-plus-fill"></i> {{ $isOutOfStock ? 'Habis' : 'Tambah' }}
-                                            </button>
-                                        </div>
+                                        {{-- Pesan peringatan stok (muncul lewat JS) --}}
+                                        <div class="catalog-warning d-none mt-1 ps-1"></div>
                                     </div>
                                 </form>
                             </div>
@@ -277,7 +323,7 @@
         {{-- ==================== KERANJANG BELANJA (KANAN) ==================== --}}
         <div class="col-lg-5">
             <div class="card lux-master-frame h-100 d-flex flex-column">
-                
+
                 <!-- Header Keranjang -->
                 <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between" style="border-color: var(--lux-border) !important;">
                     <h5 class="m-0 fw-bold text-dark d-flex align-items-center gap-2">
@@ -306,7 +352,7 @@
                                     <tr>
                                         <td class="ps-4 py-3" style="max-width: 120px;">
                                             <div class="d-flex align-items-center gap-2">
-                                                <img src="{{ asset('storage/'.$item->produk->foto) }}" alt="" class="rounded-2 border flex-shrink-0" style="width: 34px; height: 34px; object-fit: cover; border-color: #f1e6db !important;">
+                                                <img src="{{ asset('storage/' . $item->produk->foto) }}" alt="" class="rounded-2 border flex-shrink-0" style="width: 34px; height: 34px; object-fit: cover; border-color: #f1e6db !important;">
                                                 <div class="overflow-hidden">
                                                     <div class="fw-bold text-dark text-truncate small" title="{{ $item->produk->nama }}">{{ $item->produk->nama }}</div>
                                                 </div>
@@ -314,33 +360,44 @@
                                         </td>
                                         <td class="small text-muted">Rp {{ number_format($item->produk->harga_jual, 0, ',', '.') }}</td>
                                         <td>
-                                            <form method="POST" action="{{ route('itempenjualan.update', $item->id) }}">
+                                            <form method="POST" action="{{ route('itempenjualan.update', $item->id) }}" class="form-update-qty">
                                                 @csrf
                                                 @method('PUT')
-                                                <input type="number" 
+                                                {{-- VALIDASI STOK: onchange submit diganti JS (cek stok dulu baru submit) --}}
+                                                <input type="number"
                                                        name="quantity"
                                                        value="{{ $item->kuantitas }}"
                                                        min="1"
-                                                       class="form-control form-control-sm text-center fw-bold bg-light border-0 rounded-pill" 
-                                                       onchange="this.form.submit()"
+                                                       data-stok="{{ $item->produk->stok }}"
+                                                       data-warn="warn-item-{{ $item->id }}"
+                                                       class="qty-cart-input form-control form-control-sm text-center fw-bold bg-light border-0 rounded-pill"
                                                        {{ $sale->status === 'completed' ? 'disabled' : '' }}>
                                             </form>
                                         </td>
                                         <td class="fw-bold small" style="color: var(--lux-primary);">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+
+                                        {{-- KOLOM AKSI: TOMBOL DELETE (selalu tampil) --}}
                                         <td class="text-center pe-4">
-                                            @can('delete', $item)
-                                                <form method="POST" action="{{ route('itempenjualan.destroy', $item->id) }}" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" 
-                                                            class="btn btn-sm text-danger border-0 bg-transparent p-1" 
-                                                            onclick="return confirm('Hapus item ini dari keranjang?')"
-                                                            title="Hapus"
-                                                            {{ $sale->status === 'completed' ? 'disabled' : '' }}>
-                                                        <i class="bi bi-trash3 fs-6"></i>
-                                                    </button>
-                                                </form>
-                                            @endcan
+                                            <form method="POST"
+                                                  action="{{ route('itempenjualan.destroy', $item->id) }}"
+                                                  class="d-inline form-hapus-item">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="btn-lux-delete"
+                                                        title="Hapus item"
+                                                        {{ $sale->status === 'completed' ? 'disabled' : '' }}>
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+
+                                    {{-- BARIS PERINGATAN STOK (tersembunyi, muncul jika qty > stok) --}}
+                                    <tr id="warn-item-{{ $item->id }}" class="stock-warning-row d-none">
+                                        <td colspan="5" class="ps-4 py-1">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                            <span class="warning-text"></span>
                                         </td>
                                     </tr>
                                 @empty
@@ -359,14 +416,14 @@
                     </div>
                 </div>
 
-                {{-- Footer & Panel Kalkulasi Checkout Mewah --}}
+                {{-- Footer & Panel Checkout --}}
                 <div class="card-footer bg-white p-4 border-top" style="border-color: var(--lux-border) !important;">
-                    
-                    <!-- Panel Resi Tagihan -->
+
+                    <!-- Panel Total -->
                     <div class="lux-receipt-box p-3 mb-3 d-flex justify-content-between align-items-center shadow-sm">
                         <div>
-                            <span class="d-block small fw-bold text-uppercase tracking-wider mb-1" style="font-size: 10px; color: var(--lux-primary); letter-spacing: 0.8px;">TOTAL TAGIHAN PEMBAYARAN</span>
-                            <span class="fw-bold fs-3 text-dark" id="total-tagihan-text">
+                            <span class="d-block small fw-bold text-uppercase mb-1" style="font-size: 10px; color: var(--lux-primary); letter-spacing: 0.8px;">TOTAL TAGIHAN PEMBAYARAN</span>
+                            <span class="fw-bold fs-3 text-dark" id="total-tagihan-text" data-total="{{ (int) $sale->total_pembayaran }}">
                                 Rp {{ number_format($sale->total_pembayaran, 0, ',', '.') }}
                             </span>
                         </div>
@@ -375,33 +432,72 @@
                         </div>
                     </div>
 
-                    {{-- Form Checkout Selesai dengan ID untuk SweetAlert2 --}}
-                    <form id="form-checkout" 
-                          method="POST" 
+                    {{-- Form Checkout --}}
+                    <form id="form-checkout"
+                          method="POST"
                           action="{{ route('penjualan.update', $sale->id) }}">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-secondary mb-1">Metode Pembayaran</label>
-                            <select name="payment_method" class="form-select rounded-pill border shadow-none bg-light py-2" required {{ $sale->status === 'completed' ? 'disabled' : '' }} style="border-color: var(--lux-border) !important;">
+                            <select name="payment_method"
+                                    id="paymentMethodSelect"
+                                    class="form-select rounded-pill border shadow-none bg-light py-2"
+                                    required
+                                    {{ $sale->status === 'completed' ? 'disabled' : '' }}
+                                    style="border-color: var(--lux-border) !important;">
                                 <option value="">-- Pilih Metode Pembayaran --</option>
                                 <option value="CASH">CASH (Tunai)</option>
                                 <option value="QRIS">QRIS</option>
                             </select>
+
+                            <!-- Khusus CASH -->
+                            <div id="cashContainer" class="d-none mt-3 p-3 border rounded bg-white shadow-sm">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold text-secondary">Uang Tunai dari Pembeli (Rp)</label>
+                                    <input type="number"
+                                           id="inputUangBayar"
+                                           class="form-control form-control-sm"
+                                           min="0"
+                                           placeholder="Contoh: 5000000">
+                                </div>
+                                <div class="small">
+                                    <span class="fw-bold text-secondary">Kembalian: </span>
+                                    <span id="textKembalian" class="fw-bold text-success">Rp 0</span>
+                                </div>
+                            </div>
+
+                            <!-- Khusus QRIS -->
+                            <div id="qrisImageContainer" class="d-none mt-3 text-center p-3 border rounded bg-white shadow-sm">
+                                <p class="small fw-bold text-secondary mb-2">Scan QRIS untuk Pembayaran:</p>
+                                <img src="{{ asset('images/qr.jpg') }}"
+                                     alt="QRIS Code"
+                                     style="width: 100%; max-width: 400px; height: auto; object-fit: contain;"
+                                     class="mx-auto d-block">
+                            </div>
                         </div>
 
-                        <button type="submit" id="btn-checkout" class="btn btn-lux-primary w-100 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 {{ $sale->status === 'completed' ? 'disabled' : '' }}">
+                        <button type="submit"
+                                id="btn-checkout"
+                                class="btn btn-lux-primary w-100 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 {{ $sale->status === 'completed' ? 'disabled' : '' }}"
+                                {{ $sale->status === 'completed' ? 'disabled' : '' }}>
                             <i class="bi bi-shield-check fs-5"></i> Selesaikan Transaksi (Checkout)
                         </button>
                     </form>
 
                     {{-- Form Pembatalan Transaksi --}}
                     @can('delete', $sale)
-                        <form method="POST" action="{{ route('penjualan.destroy', $sale->id) }}" onsubmit="return confirm('Yakin ingin membatalkan transaksi ini?')" class="mt-2">
+                        <form method="POST"
+                              action="{{ route('penjualan.destroy', $sale->id) }}"
+                              onsubmit="return confirm('Yakin ingin membatalkan transaksi ini?')"
+                              class="mt-2">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-outline-danger btn-sm w-100 rounded-pill border-0 text-danger py-1 {{ $sale->status === 'completed' ? 'disabled' : '' }}" style="font-size: 12px;">
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm w-100 rounded-pill border-0 text-danger py-1 {{ $sale->status === 'completed' ? 'disabled' : '' }}"
+                                    style="font-size: 12px;"
+                                    {{ $sale->status === 'completed' ? 'disabled' : '' }}>
                                 <i class="bi bi-x-circle me-1"></i> Batalkan Sesi Transaksi Ini
                             </button>
                         </form>
@@ -414,36 +510,251 @@
     </div>
 </div>
 
-{{-- Script SweetAlert2 untuk Konfirmasi Checkout --}}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const checkoutForm = document.getElementById('form-checkout');
-        
+        // ---------- Elemen ----------
+        const totalEl        = document.getElementById('total-tagihan-text');
+        const totalBelanja   = parseInt(totalEl ? totalEl.dataset.total : 0, 10) || 0;
+        const paymentSelect  = document.getElementById('paymentMethodSelect');
+        const cashContainer  = document.getElementById('cashContainer');
+        const qrisContainer  = document.getElementById('qrisImageContainer');
+        const inputBayar     = document.getElementById('inputUangBayar');
+        const textKembalian  = document.getElementById('textKembalian');
+        const checkoutForm   = document.getElementById('form-checkout');
+        const btnCheckout    = document.getElementById('btn-checkout');
+        const searchInput    = document.getElementById('search-input');
+        const searchForm     = document.getElementById('form-search');
+        const sudahSelesai   = @json($sale->status === 'completed');
+
+        const formatRp = (n) => 'Rp ' + n.toLocaleString('id-ID');
+        const hasSwal  = typeof Swal !== 'undefined';
+
+        // ---------- Pencarian (debounce, tidak reload tiap ketikan) ----------
+        if (searchInput && searchForm) {
+            if (searchInput.value) {
+                searchInput.focus();
+                const len = searchInput.value.length;
+                searchInput.setSelectionRange(len, len);
+            }
+            let searchTimer;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => searchForm.submit(), 500);
+            });
+        }
+
+        // ==========================================================
+        //  VALIDASI STOK
+        // ==========================================================
+        const pesanStok = (stok) => `Jumlah melebihi sisa stok (tersisa ${stok})`;
+
+        // ----- 1) Katalog (kiri): qty yang mau ditambahkan -----
+        document.querySelectorAll('.qty-catalog-input').forEach(function (input) {
+            const stok = parseInt(input.dataset.stok, 10) || 0;
+            const form = input.closest('form');
+            const warn = form.querySelector('.catalog-warning');
+
+            function cekKatalog() {
+                const qty  = parseInt(input.value, 10) || 0;
+                const over = stok > 0 && qty > stok;
+
+                // setCustomValidity: browser otomatis menolak submit + menampilkan pesan ini
+                input.setCustomValidity(over ? pesanStok(stok) : '');
+                input.classList.toggle('qty-invalid', over);
+
+                if (warn) {
+                    warn.textContent = over ? pesanStok(stok) : '';
+                    warn.classList.toggle('d-none', !over);
+                }
+            }
+
+            input.addEventListener('input', cekKatalog);
+            cekKatalog();
+        });
+
+        // ----- 2) Keranjang (kanan): qty item yang sudah ada -----
+        function cekItemKeranjang(input) {
+            const stok = parseInt(input.dataset.stok, 10) || 0;
+            const qty  = parseInt(input.value, 10) || 0;
+            const over = qty > stok;
+            const warnRow = document.getElementById(input.dataset.warn);
+
+            input.classList.toggle('qty-invalid', over);
+
+            if (warnRow) {
+                warnRow.classList.toggle('d-none', !over);
+                const teks = warnRow.querySelector('.warning-text');
+                if (teks) teks.textContent = pesanStok(stok);
+            }
+            return !over; // true = aman
+        }
+
+        function updateTombolCheckout() {
+            if (sudahSelesai || !btnCheckout) return;
+            const adaMelebihi = document.querySelectorAll('.qty-cart-input.qty-invalid').length > 0;
+            btnCheckout.disabled = adaMelebihi;
+            btnCheckout.title = adaMelebihi ? 'Ada item yang jumlahnya melebihi sisa stok' : '';
+        }
+
+        document.querySelectorAll('.qty-cart-input').forEach(function (input) {
+            const form = input.closest('form');
+
+            cekItemKeranjang(input);            // cek saat halaman dimuat
+
+            input.addEventListener('input', function () {
+                cekItemKeranjang(input);
+                updateTombolCheckout();
+            });
+
+            // Dulu: onchange="this.form.submit()". Sekarang cek stok dulu.
+            input.addEventListener('change', function () {
+                if (!(parseInt(input.value, 10) >= 1)) input.value = 1;
+
+                if (cekItemKeranjang(input)) {
+                    form.submit();
+                } else {
+                    updateTombolCheckout();
+                    const stok = parseInt(input.dataset.stok, 10) || 0;
+                    if (hasSwal) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Stok tidak cukup',
+                            text: pesanStok(stok),
+                            confirmButtonColor: '#8e5b42'
+                        });
+                    }
+                }
+            });
+
+            // Jaga-jaga kalau user menekan Enter
+            form.addEventListener('submit', function (e) {
+                if (!cekItemKeranjang(input)) {
+                    e.preventDefault();
+                    updateTombolCheckout();
+                }
+            });
+        });
+
+        updateTombolCheckout();
+
+        // ---------- Metode pembayaran ----------
+        function hitungKembalian() {
+            if (!inputBayar || !textKembalian) return;
+            const uangBayar = parseFloat(inputBayar.value) || 0;
+            const kembalian = uangBayar - totalBelanja;
+
+            if (kembalian >= 0) {
+                textKembalian.innerText = formatRp(kembalian);
+                textKembalian.classList.remove('text-danger');
+                textKembalian.classList.add('text-success');
+            } else {
+                textKembalian.innerText = 'Uang kurang (' + formatRp(Math.abs(kembalian)) + ')';
+                textKembalian.classList.remove('text-success');
+                textKembalian.classList.add('text-danger');
+            }
+        }
+
+        function handlePaymentChange() {
+            const value = paymentSelect.value;
+            cashContainer.classList.toggle('d-none', value !== 'CASH');
+            qrisContainer.classList.toggle('d-none', value !== 'QRIS');
+            if (value === 'CASH') hitungKembalian();
+        }
+
+        if (paymentSelect) {
+            paymentSelect.addEventListener('change', handlePaymentChange);
+            handlePaymentChange();
+        }
+        if (inputBayar) {
+            inputBayar.addEventListener('input', hitungKembalian);
+        }
+
+        // ---------- Konfirmasi hapus item ----------
+        document.querySelectorAll('.form-hapus-item').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                if (hasSwal) {
+                    Swal.fire({
+                        title: 'Hapus item?',
+                        text: 'Item ini akan dihapus dari keranjang.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#b42318',
+                        cancelButtonColor: '#737373',
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal',
+                        background: '#fcf8f5',
+                        customClass: { popup: 'rounded-4 shadow-lg border' }
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                } else if (confirm('Hapus item ini dari keranjang?')) {
+                    form.submit();
+                }
+            });
+        });
+
+        // ---------- Konfirmasi checkout ----------
         if (checkoutForm) {
             checkoutForm.addEventListener('submit', function (e) {
-                e.preventDefault(); // Mencegah form langsung submit
+                e.preventDefault();
 
-                let totalTagihan = document.getElementById('total-tagihan-text').innerText;
+                // Validasi stok: blokir checkout kalau ada qty melebihi stok
+                if (document.querySelectorAll('.qty-cart-input.qty-invalid').length > 0) {
+                    if (hasSwal) {
+                        Swal.fire({ icon: 'error', title: 'Stok tidak cukup', text: 'Ada item yang jumlahnya melebihi sisa stok. Perbaiki dulu jumlahnya.', confirmButtonColor: '#8e5b42' });
+                    } else {
+                        alert('Ada item yang jumlahnya melebihi sisa stok. Perbaiki dulu jumlahnya.');
+                    }
+                    return;
+                }
 
-                Swal.fire({
-                    title: 'Konfirmasi Transaksi',
-                    text: `Total tagihan pembayaran sebesar ${totalTagihan}. Lanjutkan proses checkout?`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#8e5b42', // Warna cokelat khas Maison POS
-                    cancelButtonColor: '#737373',
-                    confirmButtonText: 'Ya, Selesaikan!',
-                    cancelButtonText: 'Batal',
-                    background: '#fcf8f5',
-                    color: '#1e1e1e',
-                    customClass: {
-                        popup: 'rounded-4 shadow-lg border'
+                // Validasi keranjang kosong
+                if (totalBelanja <= 0) {
+                    if (hasSwal) {
+                        Swal.fire({ icon: 'warning', title: 'Keranjang kosong', text: 'Tambahkan produk terlebih dahulu.', confirmButtonColor: '#8e5b42' });
+                    } else {
+                        alert('Keranjang masih kosong.');
                     }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        checkoutForm.submit(); // Lanjutkan submit form jika dikonfirmasi
+                    return;
+                }
+
+                // Validasi uang tunai
+                if (paymentSelect.value === 'CASH') {
+                    const uangBayar = parseFloat(inputBayar.value) || 0;
+                    if (uangBayar < totalBelanja) {
+                        if (hasSwal) {
+                            Swal.fire({ icon: 'error', title: 'Uang kurang', text: 'Uang tunai kurang dari total tagihan.', confirmButtonColor: '#8e5b42' });
+                        } else {
+                            alert('Uang tunai kurang dari total tagihan.');
+                        }
+                        inputBayar.focus();
+                        return;
                     }
-                });
+                }
+
+                const totalTagihan = totalEl.innerText.trim();
+
+                if (hasSwal) {
+                    Swal.fire({
+                        title: 'Konfirmasi Transaksi',
+                        text: `Total tagihan pembayaran sebesar ${totalTagihan}. Lanjutkan proses checkout?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#8e5b42',
+                        cancelButtonColor: '#737373',
+                        confirmButtonText: 'Ya, Selesaikan!',
+                        cancelButtonText: 'Batal',
+                        background: '#fcf8f5',
+                        color: '#1e1e1e',
+                        customClass: { popup: 'rounded-4 shadow-lg border' }
+                    }).then((result) => {
+                        if (result.isConfirmed) checkoutForm.submit();
+                    });
+                } else if (confirm(`Total tagihan ${totalTagihan}. Lanjutkan checkout?`)) {
+                    checkoutForm.submit();
+                }
             });
         }
     });

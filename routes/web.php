@@ -8,6 +8,7 @@ use App\Http\Controllers\ItemPenjualanController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\JenisController;
+use App\Http\Controllers\LaporanController; // <-- Tambahan import LaporanController
 
 // Otomatis diarahkan ke halaman login
 Route::get('/', function () {
@@ -45,13 +46,15 @@ Route::middleware('auth')->group(function () {
     });
 
     // ===================================================
-    // PRODUK, PENJUALAN, ITEM PENJUALAN — bisa diakses Admin & Kasir
-    // (pembatasan create/update/delete lebih rinci diatur lewat Policy)
+    // PRODUK, PENJUALAN, ITEM PENJUALAN, & LAPORAN — bisa diakses Admin & Kasir
     // ===================================================
     Route::middleware('role:Admin,Kasir')->group(function () {
         Route::resource('produk', ProdukController::class);
         Route::resource('penjualan', PenjualanController::class);
         Route::resource('itempenjualan', ItemPenjualanController::class);
+
+        // Rute Laporan Penjualan (Harian, Mingguan, Bulanan)
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     });
 
     // ===================================================

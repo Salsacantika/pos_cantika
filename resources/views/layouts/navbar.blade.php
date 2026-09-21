@@ -40,7 +40,11 @@
                 <i class="bi bi-receipt me-2 fs-5"></i> Penjualan
             </a>
         </li>
-
+       <li class="nav-item">
+        <a href="{{ route('laporan.index') }}" class="nav-link py-2 px-3 rounded-3 fw-medium d-flex align-items-center {{ Request::is('laporan*') ? 'active-link' : 'custom-link' }}">
+            <i class="bi bi-receipt me-2 fs-5"></i> Laporan
+        </a>
+    </li>
         <li class="nav-item">
             <a href="{{ route('tentang') }}" class="nav-link py-2 px-3 rounded-3 fw-medium d-flex align-items-center {{ Request::is('tentang*') ? 'active-link' : 'custom-link' }}">
                 <i class="bi bi-info-circle-fill me-2 fs-5"></i> Tentang

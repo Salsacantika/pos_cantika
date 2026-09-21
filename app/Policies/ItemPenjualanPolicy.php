@@ -7,8 +7,9 @@ use App\Models\User;
 
 class ItemPenjualanPolicy
 {
-   public function delete(User $user, ItemPenjualan $itemPenjualan): bool
+   public function delete(User $user, ItemPenjualan $item): bool
    {
-    return $user->role->name === 'admin';
+      // Boleh hapus selama transaksi belum selesai
+      return $item->penjualan->status !== 'completed';
    }
 }

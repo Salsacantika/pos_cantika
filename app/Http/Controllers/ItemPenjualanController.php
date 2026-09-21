@@ -37,7 +37,16 @@ class ItemPenjualanController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($request) {
+        $product = Produk::findOrFail($request->product_id);
+
+        // 🔒 Cek apakah jumlah yang diminta melebihi stok tersedia
+        if ($product->stok < $request->quantity) {
+            return back()
+                ->with('error', 'Jumlah barang melebihi stok yang tersedia (Sisa stok: ' . $product->stok . ')')
+                ->with('keep_cart', true);
+        }
+
+        DB::transaction(function () use ($request, $product) {
 
             // Cari transaksi pending milik user yang sedang login.
             // Jika belum ada, otomatis buat transaksi baru.
@@ -52,14 +61,8 @@ class ItemPenjualanController extends Controller
                 ]
             );
 
-            // Cari produk dan kunci data selama transaksi berjalan
-            $product = Produk::lockForUpdate()
-                ->findOrFail($request->product_id);
-
-            // Cek stok produk
-            if ($product->stok < $request->quantity) {
-                throw new \Exception('Produk stok tidak mencukupi');
-            }
+            // Kunci data produk selama transaksi berjalan
+            $product = Produk::lockForUpdate()->find($product->id);
 
             // Kurangi stok produk
             $product->decrement('stok', $request->quantity);
@@ -71,12 +74,9 @@ class ItemPenjualanController extends Controller
                 ->first();
 
             if ($item) {
-
                 // Jika produk sudah ada, tambahkan jumlahnya
                 $item->kuantitas += $request->quantity;
-
             } else {
-
                 // Jika belum ada, buat item baru
                 $item = new ItemPenjualan([
                     'penjualan_id' => $sale->id,
@@ -132,19 +132,23 @@ class ItemPenjualanController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        DB::transaction(function () use ($request, $itempenjualan) {
+        $produk = $itempenjualan->produk;
+        $selisih = $request->quantity - $itempenjualan->kuantitas;
 
-            $produk = $itempenjualan->produk()->lockForUpdate()->first();
+        // 🔍 Jika qty bertambah, cek apakah selisihnya melebihi sisa stok di database
+        if ($selisih > 0) {
+            if ($produk->stok < $selisih) {
+                return back()
+                    ->with('error', 'Jumlah barang melebihi stok yang tersedia (Sisa stok di gudang: ' . $produk->stok . ')')
+                    ->with('keep_cart', true);
+            }
+        }
 
-            $selisih = $request->quantity - $itempenjualan->kuantitas;
+        DB::transaction(function () use ($request, $itempenjualan, $produk, $selisih) {
+            $produk = $produk->fresh(); // refresh instance dengan lock
+            $produk = Produk::lockForUpdate()->find($produk->id);
 
-            // 🔍 Jika qty bertambah = kurangi stok
             if ($selisih > 0) {
-                if ($produk->stok < $selisih) {
-                    return redirect()->route('penjualan.create')
-                        ->with('errors', 'Stok tidak mencukupi')
-                        ->with('keep_cart', true);
-                }
                 $produk->decrement('stok', $selisih);
             }
 
@@ -162,11 +166,11 @@ class ItemPenjualanController extends Controller
             // 🔄 Update total penjualan
             $itempenjualan->penjualan->update([
                 'total_pembayaran' =>
-                    $itempenjualan->penjualan->itemPenjualan()->sum('subtotal')
+                $itempenjualan->penjualan->itemPenjualan()->sum('subtotal')
             ]);
         });
 
-        // 🚦 keep_cart = true → jangan reset transaksi pending saat balik ke create()
+        // 🚦 keep_cart = true → jangan reset transaksi pending saat balik
         return back()->with('keep_cart', true);
     }
 
